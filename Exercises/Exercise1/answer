@@ -1,0 +1,13 @@
+3.
+Why do we use concurrent execution (multithreading/multiprocessing, or the like)?
+    - To keep a process responsive by switching between threads when necessary to avoid unneccesary wait times
+    - Simplify coding of cooperating tasks
+    - Makes it possible to not block the flow of operations when performing heavy operations
+    * Can make programming more difficult by having thread race conditions.
+
+What are the differences between processes, threads, green threads, and coroutines?
+    - Green threads are scheduled by a virtual machine instead of natively by the operative system, threads are scheduled by the operative system, processes are executions of instructions that runs as threads, coroutines is a subroutine that can pause in the middle and return a value. When called again it picks up where it paused.
+    * pthread_create() makes a thread, threading.Thread() makes a thread, go creates a thread.
+    * Pythons GIL prevents multiple threads getting executed at once.
+    * You can use the multiprocessing package to sidestep it (you use subprocesses instead of threads).
+    * Sets the maximum number of CPUs that can be executing simulatneously and returns the previous setting.
