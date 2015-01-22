@@ -14,7 +14,7 @@ var i int = 0
 
 func countUp(done chan bool) {
 	for k := 0; k <= 1000000; k++ {
-	    mutex.Lock()
+		mutex.Lock()
 		i += 1
 		mutex.Unlock()
 	}
@@ -23,9 +23,9 @@ func countUp(done chan bool) {
 
 func countDown(done chan bool) {
 	for k := 0; k <= 1000001; k++ {
-	    mutex.Lock()
-        i -= 1
-        mutex.Unlock()
+		mutex.Lock()
+        	i -= 1
+        	mutex.Unlock()
 	}
 	done<- true
 }
