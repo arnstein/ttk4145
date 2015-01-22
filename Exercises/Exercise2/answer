@@ -1,0 +1,8 @@
+Atomic operation:
+    - When you access shared data by using atomic operations, then no other thread can access the same data.
+Semaphore:
+    - Semaphores restricts the number of simultaneous users of a shared resource up to a maximum number.
+Mutex:
+    - A mutex object only allows one thread into a controlled section, forcing other threads which attempt to gain access to that section to wait until the first thread has exited from that section.
+Critical section:
+    - Section of code that needs to be executed without outside interference
