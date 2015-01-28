@@ -1,0 +1,116 @@
+V "GNAT Lib v4.6"
+M P W=b
+P SS ZX
+R nnnnnnnnnnnnvnnnnnnnnnnnnvnnnnnnnnvnnnnnnnnnvnnnnnnnnnnnnnvnnnnnvnnnnnnnnnnnnnnn
+
+U udpsender%b		udpSender.adb		b8dcb5e2 NE OO SU IL
+W ada%s			ada.ads			ada.ali
+W ada.streams%s		a-stream.ads		a-stream.ali
+W ada.strings%s		a-string.ads		a-string.ali
+W ada.strings.unbounded%s  a-strunb.adb		a-strunb.ali
+W ada.tags%s		a-tags.adb		a-tags.ali
+W ada.text_io%s		a-textio.adb		a-textio.ali
+W gnat%s		gnat.ads		gnat.ali
+W gnat.sockets%s	g-socket.adb		g-socket.ali
+W system.concat_3%s	s-conca3.adb		s-conca3.ali
+W system.finalization_implementation%s  s-finimp.adb  s-finimp.ali
+W system.finalization_root%s  s-finroo.adb	s-finroo.ali
+W system.parameters%s	s-parame.adb		s-parame.ali
+W system.secondary_stack%s  s-secsta.adb	s-secsta.ali
+W system.soft_links%s	s-soflin.adb		s-soflin.ali
+W system.standard_library%s  s-stalib.adb	s-stalib.ali
+
+D ada.ads		20070406091342 3ffc8e18
+D a-charac.ads		20070912115821 2d3ec45b
+D a-chlat1.ads		20070912115821 2825df20
+D a-except.ads		20090727140100 0c711ac9
+D a-finali.ads		20090409150019 e5e85fa4
+D a-filico.ads		20090409150019 872dc219
+D a-ioexce.ads		20091130110856 8b9de6cd
+D a-stream.ads		20090409150019 2ca4ee37
+D a-string.ads		20070406091342 90ac6797
+D a-strmap.ads		20090409150019 9cb836fb
+D a-strunb.ads		20101220072657 e684739b
+D a-tags.ads		20101021101406 c7695348
+D a-textio.ads		20091028140912 386df5d4
+D a-unccon.ads		20070406091342 f9eb8f06
+D a-uncdea.ads		20070406091342 f15a5ed1
+D gnat.ads		20050905075125 fd2ad2f1
+D g-socket.ads		20101220072657 c20e5040
+D interfac.ads		20090409150019 f77d8799
+D i-c.ads		20101007125900 809c38c4
+D i-cstrea.ads		20100622165701 1bd72c32
+D system.ads		20140416172229 23e1f70b
+D s-conca3.ads		20090420091404 762a026a
+D s-crtl.ads		20100617122610 ac77b159
+D s-exctab.ads		20090417131547 66e51330
+D s-ficobl.ads		20100909103250 443b9d66
+D s-finimp.ads		20090409150019 46853fe8
+D s-finroo.ads		20090409150019 dbb860c9
+D s-oscons.ads		20140416173717 12fb28d2
+D s-parame.ads		20091130110856 9c5d83fa
+D s-secsta.ads		20090707124243 eea35a36
+D s-soflin.ads		20090729085153 9414c974
+D s-stache.ads		20090417130712 596fc1b4
+D s-stalib.ads		20101021102512 c4241c00
+D s-stoele.ads		20090417130712 facd7d98
+D s-stoele.adb		20100617152355 afc5dc80
+D s-stratt.ads		20100909123135 aedef97e
+D s-traent.ads		20090417130712 5221ee41
+D s-unstyp.ads		20090409150019 6ae15c76
+D s-wchcon.ads		20090417130712 bfeb2e3d
+D udpSender.adb		20150128103509 889f8dda
+X 1 ada.ads
+16K9*Ada 19e8 40|1r6 1r23 2r6 2r33 4r6 5r10 13r12 14r12 15r12 16r13 30r3
+. 35r7 37r7 40r10
+X 8 a-stream.ads
+36K13*Streams 69e16 40|4w10 5r14 13r16 14r16 15r16 16r17 35r11
+42M9*Stream_Element
+44I9*Stream_Element_Offset<long_integer> 40|15r24
+48I12*Stream_Element_Count{44I9} 40|5r22 13r24
+51A9*Stream_Element_Array(42M9)<44I9> 40|14r24 16r25
+54x14*Read 40|35R19
+X 9 a-string.ads
+16K13*Strings 35e16 40|2r10 2r37
+X 11 a-strunb.ads
+77K21*Unbounded 490e26 40|2w18 2r45
+80R9*Unbounded_String 474e14 40|11r13
+X 13 a-textio.ads
+49K13*Text_IO 472e16 40|1w10 1r27 30r7 37r11 40r14
+209U14*Put 40|40s22
+264U14*Put_Line 40|30s15 37s19 42s7
+X 16 gnat.ads
+36K9*GNAT 39e9 40|3r6 3r24
+X 17 g-socket.ads
+60K14*Sockets 1252e17 40|3w11 3r29
+392U14*Initialize 40|20s3
+392b26 Process_Blocking_IO{boolean} 40|20r14
+414I9*Socket_Type 40|8r13
+465n25*Family_Inet{465E9} 40|22r26
+469n38*Socket_Datagram{469E9} 40|22r39
+481I9*Port_Type<integer>
+507R9*Sock_Addr_Type 510e14 40|8r36
+508r7*Addr{490R9} 40|26m11
+509i7*Port{481I9} 40|24m11
+523V13*Image{string} 40|37s39
+526V13*Inet_Addr{490R9} 40|26s19
+807U14*Create_Socket 40|22s3
+837U14*Bind_Socket 40|27s3
+843U14*Close_Socket 40|45s3
+963U14*Send_Socket 40|34s7
+967r7 To{507R9} 40|34r42
+995P9*Stream_Access(8|39R9) 40|9r13
+1001V13*Stream{995P9} 40|29s14
+1007V13*Get_Address{507R9} 40|36s18
+X 40 udpSender.adb
+7U11*udpsender 7b11 47l5 47t14
+8i3 client{17|414I9} 22m17 27r16 29r22 34r19 45r16
+8r26 address{17|507R9} 24m3 26m3 27r24 29r30 34r48 36m7 37r46
+9p3 Channel{17|995P9} 29m3 35r25 36r31
+11r3 Message{11|80R9}
+13i3 Offset{8|48I12} 35m44 38r17 39r21
+14a3 Data{8|51A9} 35m38 40r42
+15i3 Last{8|44I9} 33m7 34m37
+16a3 sendData{8|51A9} 33r15 34r27
+39i11 I<long_integer> 40r47
+
