@@ -1,0 +1,16 @@
+Primary:
+spawn new program
+read file, print latest number
+while 1
+    write number to file
+    write number to terminal
+    send heartbeat
+
+Backup:
+while 1
+if not heartbeat:
+    become primary
+
+
+backup:
+    
