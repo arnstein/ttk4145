@@ -7,7 +7,7 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
-	"syscall"
+	//"syscall"
 	"time"
 )
 
@@ -62,7 +62,6 @@ func hbListener() {
 	recvSocket, err := net.ListenUDP("udp", localAddress)
 	checkError(err)
 	data := make([]byte, 1024)
-	recvSocket.SetReadDeadline(time.Now().Add(100 * time.Millisecond))
 
 	lastHb := time.Now()
 
@@ -79,7 +78,7 @@ func hbListener() {
 }
 
 func openFile() *os.File {
-	f, err := os.OpenFile("dat1", os.O_RDWR, 0666)
+	f, err := os.OpenFile("dat1", os.O_RDWR|os.O_APPEND, 0666)
 	if err != nil {
 		fmt.Println("create new file")
 		f, err = os.Create("dat1")
@@ -115,11 +114,11 @@ func main() {
 	// heartbeatsender
 	go udpSend()
 
-	argv := []string{"run", "main.go"}
-	syscall.ForkExec("pwd", argv, nil)
-	err := exec.Command("xterm", "&").Start()
-	//err := exec.Command("xterm", "go", "run", "main.go").Start()
-	checkError(err)
+	//argv := []string{"run", "main.go"}
+	//syscall.ForkExec("pwd", argv, nil)
+	//err := exec.Command("xterm").Start()
+	//err := exec.Command("xterm", "-hold", "-e", "go", "run", "main.go").Start()
+	//checkError(err)
 
 	f := openFile()
 	var number int = readLastNumber()
@@ -128,6 +127,8 @@ func main() {
 	for {
 		d1 := []byte(strconv.Itoa(number) + "\n")
 		_, err := f.Write(d1)
+		checkError(err)
+		err = f.Sync()
 		checkError(err)
 		fmt.Println(number)
 		number++
