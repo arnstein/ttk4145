@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+	"syscall"
 	"time"
 )
 
@@ -114,7 +115,10 @@ func main() {
 	// heartbeatsender
 	go udpSend()
 
-	err := exec.Command("xterm", "go", "run", "main.go").Start()
+	argv := []string{"run", "main.go"}
+	syscall.ForkExec("pwd", argv, nil)
+	err := exec.Command("xterm", "&").Start()
+	//err := exec.Command("xterm", "go", "run", "main.go").Start()
 	checkError(err)
 
 	f := openFile()
