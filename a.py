@@ -16,7 +16,7 @@ def sub():
 	global count
 	global lock
 	global done2
-	for i in range(1000 * 1000):
+	for i in range(1000 * 1000 + 1):
 		with lock:
 			count -= 1
 

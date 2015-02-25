@@ -4,11 +4,13 @@ import (
 	"controlloop"
 	"fmt"
 	"math/rand"
+	"network"
 	"os"
 	"os/signal"
 )
 
 func main() {
+	network.NetworkInit()
 	arrived := make(chan int)
 	orders := make(chan int)
 	c := make(chan os.Signal, 1)
@@ -18,7 +20,6 @@ func main() {
 	go func() {
 		for sig := range c {
 			fmt.Println(sig)
-			controlloop.EmergencyStop()
 			os.Exit(1)
 		}
 	}()
