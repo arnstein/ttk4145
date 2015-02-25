@@ -1,29 +1,21 @@
 package main
 
 import (
-	//"controlloop"
+	"controlloop"
 	"fmt"
-	//	"math/rand"
 	"network"
 )
 
 func main() {
 	network.NetworkInit()
 	arrived := make(chan int)
-	//orders := make(chan int)
-	//c := make(chan os.Signal, 1)
-	//r := rand.New(rand.NewSource(99))
+	orders := make(chan int)
 
-	//controlloop.InitCtrl(arrived, orders)
+	controlloop.InitCtrl(arrived, orders)
 	fmt.Println("int done")
 	for {
+
+		orders <- randnr
 		<-arrived
 	}
-	//for {
-
-	//		randnr := r.Intn(4)
-	//		fmt.Println(randnr + 1)
-	//		orders <- randnr
-	//		<-arrived
-	//	}
 }
