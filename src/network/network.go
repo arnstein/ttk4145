@@ -17,6 +17,7 @@ func NetworkInit() {
 func receiver(recvChan <-chan string) {
 	//heartbeatTime := time.Now()
 	for {
+		fmt.Println("Waiting for message!")
 		receivedData := <-recvChan
 		//heartbeatTime = time.Now()
 		fmt.Println("Received " + receivedData)

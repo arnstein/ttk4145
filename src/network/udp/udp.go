@@ -16,18 +16,18 @@ func udpSend(sendChan <-chan string) {
 
 	broadcastAddress, err := net.ResolveUDPAddr("udp", "129.241.187.255:20008")
 	checkError(err)
-	localAddress, err := net.ResolveUDPAddr("udp", "129.241.187.161:20008")
+	//localAddress, err := net.ResolveUDPAddr("udp", "129.241.187.161:20008")
 	//sendSocket, err := net.DialUDP("udp", nil, broadcastAddress)
-	tempSocket, err := net.DialUDP("udp4", nil, broadcastAddress)
+	//tempSocket, err := net.DialUDP("udp4", nil, broadcastAddress)
 	checkError(err)
-	defer tempSocket.Close()
-	sendSocket, err := net.ListenUDP("udp", localAddress)
-	//	checkError(err)
+	//defer tempSocket.Close()
+	sendSocket, err := net.DialUDP("udp", nil, broadcastAddress)
+	checkError(err)
 
 	for {
 
 		data := <-sendChan
-		num, err := sendSocket.WriteToUDP([]byte(data), broadcastAddress)
+		num, err := sendSocket.Write([]byte(data))
 		//num, err := sendSocket.WriteToUDP([]byte(data), &net.UDPAddr{IP: net.IP{129, 241, 187, 255}, Port: 20008})
 		checkError(err)
 		fmt.Println("sended " + strconv.Itoa(num) + " bytes with " + data)
@@ -36,20 +36,20 @@ func udpSend(sendChan <-chan string) {
 
 func udpRecv(recvChan chan<- string) {
 
-	localAddress, err := net.ResolveUDPAddr("udp", "127.0.0.1:20008")
+	localAddress, err := net.ResolveUDPAddr("udp", ":20008")
 	checkError(err)
 
 	recvSocket, err := net.ListenUDP("udp", localAddress)
 	checkError(err)
 
-	data := make([]byte, 7)
-
+	var data []byte = make([]byte, 1500)
 	for {
-
-		length, address, err := recvSocket.ReadFromUDP(data)
+		fmt.Println("ROFLMAO")
+		length, _, err := recvSocket.ReadFromUDP(data[0:])
 		checkError(err)
 		//fmt.Println(string(data[:length]))
-		recvChan <- string(data[:length]) + "%" + string(address.IP)
+		fmt.Println("LOL")
+		recvChan <- string(data[:length]) // + "%" + string(address.IP)
 	}
 }
 
