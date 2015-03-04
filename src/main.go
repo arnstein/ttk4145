@@ -1,14 +1,13 @@
 package main
 
 import (
-	"controlloop"
+	"iohandler"
 	"fmt"
 	"network"
     "statemachine"
 )
 
 func main() {
-	network.NetworkInit()
 	arrived := make(chan int)
 	orders := make(chan int)
 

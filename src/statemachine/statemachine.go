@@ -3,31 +3,74 @@ package statemachine
 import (
     "fmt"
 )
-
-currentState = INITIALIZE;
-
+const (
+    INITIALIZE
+    IDLE
+    DOOROPEN
+    MOVING
+)
 /*
-States:
-INITIALIZE ?
-IDLE
-MOVING
-DOOROPEN
+init
+moveOrder
+timerout
+emptyqueue
+floorReached
 */
-func StateMachine() {
+
+currentstate = INITIALIZE
+
+
+func initialize(signal string) {
+    switch signals {
+    case "init":
+        network.NetworkInit()
+        controlloop.InitCtrl(arrived, orders)
+    case "floorReached":
+        // discuss and define behaviour here, should it go to floor 1 all the time? etc etc
+        currentstate = IDLE
+    }
+}
+
+func idle(signal string) {
+    switch signals {
+    case "moveOrder":
+        currentstate = MOVING
+}
+
+func doorOpen(signal string) {
+    switch signals {
+    case "timerOut":
+        currentstate = IDLE
+        // register done order so the queueChannel will send next order
+    }
+
+}
+
+func moving(signal string) {
+    switch signals {
+    case "floorReached":
+        // if right floor: motorControl(stop), currentState = doorOpen
+
+    }
+
+}
+
+func stateMachine() {
 
     select {
     case <-signalChannel:
+        signal := signalChannel
         switch stateMachine {
         case INITIALIZE:
-            fmt.Println("Initializing")
-            if signalChannel == "ready":
-                readyToGetOrders()
+            initialize(signal)
+            }
         case IDLE:
-            fmt.Println("Idle")
-        case MOVING:
-            fmt.Println("Moving")
+            idle(signal)
         case DOOROPEN:
-            fmt.Println("Door open")
+            doorOpen(signal)
+        case MOVING:
+            moving(signal)
+
         }
     }
 }
