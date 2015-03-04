@@ -17,16 +17,16 @@ var m Message
 
 func NetworkInit() {
 	sendChan := make(chan []byte)
-	recvChan := make(chan []byte)
-	udp.UdpInit(sendChan, recvChan)
+	receiveChan := make(chan []byte)
+	udp.UdpInit(sendChan, receiveChan)
 	go sendHeartBeat(sendChan)
-	go receiver(recvChan)
+	go receiver(receiveChan)
 }
 
-func receiver(recvChan <-chan []byte) Message {
+func receiver(receiveChan <-chan []byte) Message {
 	//heartbeatTime := time.Now()
 	for {
-		receivedData := <-recvChan
+		receivedData := <-receiveChan
 		//heartbeatTime = time.Now()
 		decoded := decodeJSON(receivedData)
 		fmt.Println(decoded)

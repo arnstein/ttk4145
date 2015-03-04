@@ -4,11 +4,10 @@ import (
 	"iohandler"
 	"fmt"
 	"network"
-<<<<<<< HEAD
+	//"network/udp"
 	//	"time"
-=======
-    "statemachine"
->>>>>>> origin/arnstein
+	//"statemachine"
+	//	"net"
 )
 
 func main() {
@@ -17,7 +16,6 @@ func main() {
 	controlloop.InitCtrl(arrived, orders)
 	fmt.Println("int done")
 	for {
-
 		orders <- 1
 		<-arrived
 	}

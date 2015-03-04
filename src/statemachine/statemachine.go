@@ -1,8 +1,10 @@
 package statemachine
 
+/*
 import (
     "fmt"
 )
+<<<<<<< Updated upstream
 const (
     INITIALIZE
     IDLE
@@ -55,7 +57,8 @@ func moving(signal string) {
 
 }
 
-func stateMachine() {
+
+func StateMachine() {
 
     select {
     case <-signalChannel:

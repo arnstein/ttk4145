@@ -27,15 +27,13 @@ func floorAndDirToIndex(floor int, dir int) int {
 
 	if dir == DIR_UP {
 		return wayUp
-	}
-	if dir == DIR_DOWN {
+	} else if dir == DIR_DOWN {
 		return wayDown
-	}
-	//we are between the possible inices
-	if wayUp < position && position < wayDown {
+	} else if wayUp < position && position < wayDown {
 		return wayDown
+	} else {
+		return wayUp
 	}
-	return wayUp
 }
 
 func addToQueue(floor int, dir int, globalOrLocal int) {
@@ -43,8 +41,9 @@ func addToQueue(floor int, dir int, globalOrLocal int) {
 
 	if orders[index] == GLOBAL {
 		return
+	} else {
+		orders[index] = globalOrLocal
 	}
-	orders[index] = globalOrLocal
 
 }
 

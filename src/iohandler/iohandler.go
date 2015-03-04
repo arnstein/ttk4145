@@ -6,39 +6,39 @@ import (
 	"time"
 )
 
-var nextDst int = 0
+var nextDestination int = 0
 
-func motorCtrl(arrived chan<- int) {
+func motorControl(arrived chan<- int) {
 
-	lastPos := 0
+	lastPosition := 0
 
-	currentPos := 0
+	currentPosition := 0
 
 	for {
-		currentPos = driver.GetFloorSensorSignal()
+		currentPosition = driver.GetFloorSensorSignal()
 
-		if currentPos > -1 {
-			lastPos = currentPos
-			driver.SetFloorLight(currentPos)
+		if currentPosition > -1 {
+			lastPosition = currentPosition
+			driver.SetFloorLight(currentPosition)
 		}
 
-		if currentPos == nextDst {
+		if currentPosition == nextDestination {
 			time.Sleep(200 * time.Millisecond)
 
 			driver.SetMotorDir(driver.DIR_STOP)
 
 			driver.SetDoorOpenLight(1)
-			arrived <- currentPos
+			arrived <- currentPosition
 			time.Sleep(2 * time.Second)
 
 		} else {
 			driver.SetDoorOpenLight(0)
 
-			if nextDst > lastPos {
+			if nextDestination > lastPosition {
 				driver.SetMotorDir(driver.DIR_UP)
 			}
 
-			if lastPos > nextDst {
+			if lastPosition > nextDestination {
 				driver.SetMotorDir(driver.DIR_DOWN)
 			}
 		}
@@ -48,7 +48,7 @@ func motorCtrl(arrived chan<- int) {
 func listenForOrders(order <-chan int) {
 
 	for {
-		nextDst = <-order
+		nextDestination = <-order
 	}
 }
 
@@ -56,7 +56,7 @@ func InitCtrl(arrived chan<- int, orders <-chan int) {
 
 	driver.ElevInit()
 
-	go motorCtrl(arrived)
+	go motorControl(arrived)
 	go listenForOrders(orders)
 
 }
