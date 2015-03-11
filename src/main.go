@@ -2,7 +2,7 @@ package main
 
 import (
 	//"driver"
-	//"fmt"
+	"fmt"
 	//"iohandler"
 	//"network"
 	"queue"
@@ -25,5 +25,26 @@ func main() {
 	//orders <- 1
 	//<-arrived
 	//}
+	fmt.Println(" 0 1 2 3 2 1")
+	fmt.Println()
 	queue.PrintQueue()
+
+	queue.AddToQueue(1, 1, 1)
+	queue.PrintQueue()
+
+	queue.AddToQueue(1, 0, 2)
+	queue.PrintQueue()
+
+	queue.AddToQueue(2, -1, 2)
+	queue.PrintQueue()
+
+	queue.SetCurrentFloor(0)
+	queue.PrintQueue()
+
+	queue.SetCurrentFloor(1)
+	queue.PrintQueue()
+	queue.SetCurrentFloor(2)
+	queue.PrintQueue()
+	fmt.Println(queue.GetNextOrder())
+	fmt.Println(queue.CalculateCost(1, -1))
 }

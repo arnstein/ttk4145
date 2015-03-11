@@ -19,8 +19,6 @@ const (
 
 var orders [ORDERS_ARRAY_SIZE]int
 var position int
-var lastFloor int
-var currentFloor int
 
 func PrintQueue() {
 
@@ -44,25 +42,26 @@ func PrintQueue() {
 }
 
 func SetCurrentFloor(floor int) {
-	lastFloor = currentFloor
-	currentFloor = floor
-
-	dir := currentFloor - lastFloor
-
-	if dir == DIR_UP {
-		position = currentFloor - 1
+	// move to the next request
+	for i := 0; i < ORDERS_ARRAY_SIZE; i++ {
+		position = (position + 1) % ORDERS_ARRAY_SIZE
+		if orders[position] != 0 {
+			break
+		}
 	}
-	if dir == DIR_DOWN {
-		position = ORDERS_ARRAY_SIZE - floor + 1
-		position = position % ORDERS_ARRAY_SIZE
-
+	// move back to appearance of the floor
+	for i := 0; i < ORDERS_ARRAY_SIZE; i++ {
+		// avoid negative modulo
+		if position == floor || position == ORDERS_ARRAY_SIZE-floor {
+			return
+		}
+		position = (position - 1 + ORDERS_ARRAY_SIZE) % ORDERS_ARRAY_SIZE
 	}
-
 }
 func floorAndDirToIndex(floor int, dir int) int {
 
-	wayUp := floor - 1
-	wayDown := ORDERS_ARRAY_SIZE + 1 - floor
+	wayUp := floor
+	wayDown := ORDERS_ARRAY_SIZE - floor
 
 	if dir == DIR_UP {
 		return wayUp
@@ -79,7 +78,7 @@ func floorAndDirToIndex(floor int, dir int) int {
 	return wayUp
 }
 
-func addToQueue(floor int, dir int, globalOrLocal int) {
+func AddToQueue(floor int, dir int, globalOrLocal int) {
 	index := floorAndDirToIndex(floor, dir)
 
 	if orders[index] == GLOBAL {
@@ -95,7 +94,7 @@ func removeFromQueue() {
 
 }
 
-func calculateCost(floor int, dir int) int {
+func CalculateCost(floor int, dir int) int {
 
 	endIndex := floorAndDirToIndex(floor, dir)
 
@@ -109,7 +108,7 @@ func calculateCost(floor int, dir int) int {
 	return cost
 }
 
-func getNextOrder() int {
+func GetNextOrder() int {
 
 	nextOrder := -1
 
@@ -128,8 +127,8 @@ func getNextOrder() int {
 
 	// convert index to floor
 	if nextOrder < ORDERS_ARRAY_SIZE/2 {
-		return nextOrder + 1
+		return nextOrder
 
 	}
-	return ORDERS_ARRAY_SIZE - nextOrder + 1
+	return ORDERS_ARRAY_SIZE - nextOrder
 }
