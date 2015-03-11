@@ -36,8 +36,6 @@ func PrintQueue() {
 			fmt.Print("--")
 		}
 	}
-	fmt.Println()
-	fmt.Println()
 
 }
 

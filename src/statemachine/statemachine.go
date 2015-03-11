@@ -3,7 +3,6 @@ package statemachine
 import (
 	//"fmt"
 	//"iohandler"
-	"globals"
 	"network"
 )
 
@@ -15,48 +14,56 @@ emptyqueue
 floorReached
 */
 
-var currentstate int = globals.INITIALIZE
+const (
+	INITIALIZE = 0
+	IDLE       = 1
+	DOOROPEN   = 2
+	MOVING     = 3
+)
+
+var currentState int = INITIALIZE
 
 func initialize(signal int) {
 	switch signal {
-	case globals.INIT:
+	case INIT:
 		network.NetworkInit()
-		//eventhandler.InitCtrl(arrived, orders)
-	case globals.FLOORREACHED:
-		// discuss and define behaviour here, should it go to floor 1 all the time? etc etc
-		currentstate = globals.IDLE
+        driver.ElevInit()
+        go iohandler.PollButtons()
+        // all the other inits
+		currentState = IDLE
 	}
 }
 
 func idle(signal int) {
 	switch signal {
-	case globals.MOVEORDER:
-		currentstate = globals.MOVING
+	case MOVEORDER:
+        direction = queue.getDirection()
+        motor(direction)
+		currentState = MOVING
 	}
 }
 
 func doorOpen(signal int) {
 	switch signal {
-	case globals.TIMEROUT:
-		currentstate = globals.IDLE
-		// register done order so the queueChannel will send next order
+	case TIMEROUT:
+        queue.removeFromQueue()
+		currentState = IDLE
 	}
-
 }
 
 func moving(signal int) {
 	switch signal {
-	case globals.FLOORREACHED:
-		// if right floor: motorControl(stop), currentState = doorOpen
-
-	}
-
+	case FLOORREACHED:
+        if queue.rightFloor() == 1 {
+            motor(STOP)
+            currentState = DOOROPEN
+	    }
+    }
 }
 
 func StateMachine(signalChannel <-chan int) {
-
-	for {
-		signal := <-signalChannel
+    select {
+    case signal := <-signalChannel:
 		switch signal {
 		case globals.INITIALIZE:
 			initialize(signal)
@@ -70,3 +77,4 @@ func StateMachine(signalChannel <-chan int) {
 		}
 	}
 }
+

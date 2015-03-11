@@ -50,9 +50,16 @@ func checkFloor(signalChannel chan<- int) {
 		floor := driver.GetFloorSensorSignal()
 
 		if lastFloor == -1 && floor != -1 {
+            driver.SetFloorIndicator(floor)
 			queue.SetCurrentFloor(floor)
 			signalChannel <- globals.FLOORREACHED
 		}
 		lastFloor = floor
 	}
 }
+
+func motor(command int) {
+    SetMotorDir(command)
+}
+
+// queue stuff

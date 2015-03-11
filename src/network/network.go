@@ -69,6 +69,7 @@ func decodeJSON(mess []byte) Message {
 
 func parseMessage(message Message) {
 	fmt.Print("Message type: ")
+    //if messageType == newOrder: queue.initiateCostStuff
 	fmt.Print(message.MessageType)
 	fmt.Print(" Flr: ")
 	fmt.Print(message.Data[FLOOR])

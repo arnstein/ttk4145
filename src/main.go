@@ -6,6 +6,7 @@ import (
 	//"iohandler"
 	//"network"
 	"queue"
+    "globals"
 	//"statemachine"
 	//"network/udp"
 	//	"time"
@@ -15,9 +16,7 @@ import (
 
 func main() {
 	//	go statemachine.StateMachine()
-	//driver.ElevInit()
-	//network.NetworkInit()
-	//go iohandler.PollButtons()
+    // signalChannel <- globals.INIT
 	//arrived := make(chan int)
 	//orders := make(chan int)
 	//fmt.Println("int done")
