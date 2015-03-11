@@ -42,3 +42,16 @@ func PollButtons() {
 
 	}
 }
+
+func checkFloor(signalChannel chan <- int) {
+    lastFloor := -1
+    for {
+        floor := GetFloorSensorSignal()
+
+    if lastFloor == -1 && floor != -1{
+        queue.SetCurrentFloor(floor)
+        signalChannel <- FLOORREACHED
+        }
+    lastFloor = floor
+    }
+}

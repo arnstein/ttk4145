@@ -19,7 +19,11 @@ const (
 
 var orders [ORDERS_ARRAY_SIZE]int
 var position int
+var currentFloor int
 
+func SetCurrentFloor(floor int){
+    currentFloor = floor
+}
 func floorAndDirToIndex(floor int, dir int) int {
 
 	wayUp := floor - 1
