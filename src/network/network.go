@@ -20,13 +20,12 @@ const (
 )
 
 type Message struct {
-	messageType int
-	data        string
+	MessageType int
+	Data        []int
 }
 
-	var message Message
-	message.messageType = 200
-	message.data = "lol"
+var mess Message
+
 func NetworkInit() {
 	sendChan := make(chan []byte)
 	receiveChan := make(chan []byte)
@@ -41,15 +40,16 @@ func receiveMessage(receiveChan <-chan []byte) Message {
 		receivedData := <-receiveChan
 		//heartbeatTime = time.Now()
 		decoded := decodeJSON(receivedData)
-		fmt.Println(decoded.data)
+		parseMessage(decoded)
 	}
 
 }
 
 func sendMessage(sendChan chan<- []byte) {
+	mess := Message{MessageType: ORDERSERVED, Data: []int{1, 2, 3}}
 	for {
 		time.Sleep(1 * time.Second)
-		sendChan <- encodeJSON(message)
+		sendChan <- encodeJSON(mess)
 	}
 }
 
@@ -65,4 +65,16 @@ func decodeJSON(mess []byte) Message {
 	err := json.Unmarshal(mess, &me)
 	udp.CheckError(err)
 	return me
+}
+
+func parseMessage(message Message) {
+	fmt.Print("Message type: ")
+	fmt.Print(message.MessageType)
+	fmt.Print(" Flr: ")
+	fmt.Print(message.Data[FLOOR])
+	fmt.Print(" Dir: ")
+	fmt.Print(message.Data[DIRECTION])
+	fmt.Print(" Cst: ")
+	fmt.Println(message.Data[COST])
+
 }
