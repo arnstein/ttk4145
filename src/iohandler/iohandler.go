@@ -2,61 +2,43 @@ package iohandler
 
 import (
 	"driver"
-	//"fmt"
-	"time"
+	"fmt"
+	//"time"
+	"globals"
 )
 
-var nextDestination int = 0
+func PollButtons() {
 
-func motorControl(arrived chan<- int) {
-
-	lastPosition := 0
-
-	currentPosition := 0
+	var buttonStates [3][globals.NUM_FLOORS]int
 
 	for {
-		currentPosition = driver.GetFloorSensorSignal()
+		for i := 0; i < globals.NUM_FLOORS; i++ {
 
-		if currentPosition > -1 {
-			lastPosition = currentPosition
-			driver.SetFloorLight(currentPosition)
+			newState := driver.GetButtonSignal(driver.BUTTON_COMMAND, i)
+
+			if newState == 1 && buttonStates[driver.BUTTON_COMMAND][i] == 0 {
+				fmt.Println("order local " + string(i))
+			}
+			buttonStates[driver.BUTTON_COMMAND][i] = newState
+		}
+		for i := 0; i < globals.NUM_FLOORS-1; i++ {
+
+			newState := driver.GetButtonSignal(driver.BUTTON_CALL_UP, i)
+
+			if newState == 1 && buttonStates[driver.BUTTON_CALL_UP][i] == 0 {
+				fmt.Println("order up    " + string(i))
+			}
+			buttonStates[driver.BUTTON_CALL_UP][i] = newState
+		}
+		for i := 1; i < globals.NUM_FLOORS; i++ {
+
+			newState := driver.GetButtonSignal(driver.BUTTON_CALL_DOWN, i)
+
+			if newState == 1 && buttonStates[driver.BUTTON_CALL_DOWN][i] == 0 {
+				fmt.Println("order down  " + string(i))
+			}
+			buttonStates[driver.BUTTON_CALL_DOWN][i] = newState
 		}
 
-		if currentPosition == nextDestination {
-			time.Sleep(200 * time.Millisecond)
-
-			driver.SetMotorDir(driver.DIR_STOP)
-
-			driver.SetDoorOpenLight(1)
-			arrived <- currentPosition
-			time.Sleep(2 * time.Second)
-
-		} else {
-			driver.SetDoorOpenLight(0)
-
-			if nextDestination > lastPosition {
-				driver.SetMotorDir(driver.DIR_UP)
-			}
-
-			if lastPosition > nextDestination {
-				driver.SetMotorDir(driver.DIR_DOWN)
-			}
-		}
 	}
-}
-
-func listenForOrders(order <-chan int) {
-
-	for {
-		nextDestination = <-order
-	}
-}
-
-func InitCtrl(arrived chan<- int, orders <-chan int) {
-
-	driver.ElevInit()
-
-	go motorControl(arrived)
-	go listenForOrders(orders)
-
 }

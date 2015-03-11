@@ -1,9 +1,11 @@
 package main
 
 import (
-	"iohandler"
+	"driver"
 	"fmt"
+	"iohandler"
 	"network"
+	//"statemachine"
 	//"network/udp"
 	//	"time"
 	//"statemachine"
@@ -11,9 +13,12 @@ import (
 )
 
 func main() {
+	//	go statemachine.StateMachine()
+	driver.ElevInit()
+	network.NetworkInit()
+	go iohandler.PollButtons()
 	arrived := make(chan int)
 	orders := make(chan int)
-	controlloop.InitCtrl(arrived, orders)
 	fmt.Println("int done")
 	for {
 		orders <- 1

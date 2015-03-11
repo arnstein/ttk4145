@@ -7,44 +7,49 @@ import (
 	"time"
 )
 
+const (
+	ORDER       = 0
+	HEARTBEAT   = 1
+	COSTORDER   = 2
+	TAKEORDER   = 3
+	ORDERSERVED = 4
+
+	FLOOR     = 0
+	DIRECTION = 1
+	COST      = 2
+)
+
 type Message struct {
-	Identifier  string
-	MessageType string
-	Time        int64
+	messageType int
+	data        string
 }
 
-var m Message
-
+	var message Message
+	message.messageType = 200
+	message.data = "lol"
 func NetworkInit() {
 	sendChan := make(chan []byte)
 	receiveChan := make(chan []byte)
 	udp.UdpInit(sendChan, receiveChan)
-	go sendHeartBeat(sendChan)
-	go receiver(receiveChan)
+	go sendMessage(sendChan)
+	go receiveMessage(receiveChan)
 }
 
-func receiver(receiveChan <-chan []byte) Message {
+func receiveMessage(receiveChan <-chan []byte) Message {
 	//heartbeatTime := time.Now()
 	for {
 		receivedData := <-receiveChan
 		//heartbeatTime = time.Now()
 		decoded := decodeJSON(receivedData)
-		fmt.Println(decoded)
+		fmt.Println(decoded.data)
 	}
 
 }
 
-func UpdateHeartBeatInfo(name string, messageType string) {
-	m.Identifier = name
-	m.MessageType = messageType
-	m.Time = time.Now().Unix()
-}
-
-func sendHeartBeat(sendChan chan<- []byte) {
+func sendMessage(sendChan chan<- []byte) {
 	for {
-		UpdateHeartBeatInfo("Bob", "heartbeat")
 		time.Sleep(1 * time.Second)
-		sendChan <- encodeJSON(m)
+		sendChan <- encodeJSON(message)
 	}
 }
 
@@ -57,8 +62,7 @@ func encodeJSON(mess Message) []byte {
 func decodeJSON(mess []byte) Message {
 	var me Message
 
-	eror := json.Unmarshal(mess, &me)
-	udp.CheckError(eror)
-
+	err := json.Unmarshal(mess, &me)
+	udp.CheckError(err)
 	return me
 }

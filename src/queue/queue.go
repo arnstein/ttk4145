@@ -27,13 +27,17 @@ func floorAndDirToIndex(floor int, dir int) int {
 
 	if dir == DIR_UP {
 		return wayUp
-	} else if dir == DIR_DOWN {
-		return wayDown
-	} else if wayUp < position && position < wayDown {
-		return wayDown
-	} else {
-		return wayUp
 	}
+
+	if dir == DIR_DOWN {
+		return wayDown
+	}
+
+	if wayUp < position && position < wayDown {
+		return wayDown
+	}
+
+	return wayUp
 }
 
 func addToQueue(floor int, dir int, globalOrLocal int) {
@@ -41,9 +45,8 @@ func addToQueue(floor int, dir int, globalOrLocal int) {
 
 	if orders[index] == GLOBAL {
 		return
-	} else {
-		orders[index] = globalOrLocal
 	}
+	orders[index] = globalOrLocal
 
 }
 
@@ -53,7 +56,7 @@ func removeFromQueue() {
 
 }
 
-func calculateCost(floor int, dir int) {
+func calculateCost(floor int, dir int) int {
 
 	endIndex := floorAndDirToIndex(floor, dir)
 
@@ -64,11 +67,12 @@ func calculateCost(floor int, dir int) {
 			cost++
 		}
 	}
+	return cost
 }
 
 func getNextOrder() int {
 
-	nextOrder := position
+	nextOrder := -1
 
 	//get index of next order
 	for i := 0; i < ORDERS_ARRAY_SIZE; i++ {
@@ -77,6 +81,10 @@ func getNextOrder() int {
 			nextOrder = index
 			break
 		}
+	}
+
+	if nextOrder == -1 {
+		return -1
 	}
 
 	// convert index to floor
