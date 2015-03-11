@@ -5,6 +5,7 @@ import (
 	"fmt"
 	//"time"
 	"globals"
+	"queue"
 )
 
 func PollButtons() {
@@ -43,15 +44,15 @@ func PollButtons() {
 	}
 }
 
-func checkFloor(signalChannel chan <- int) {
-    lastFloor := -1
-    for {
-        floor := GetFloorSensorSignal()
+func checkFloor(signalChannel chan<- int) {
+	lastFloor := -1
+	for {
+		floor := driver.GetFloorSensorSignal()
 
-    if lastFloor == -1 && floor != -1{
-        queue.SetCurrentFloor(floor)
-        signalChannel <- FLOORREACHED
-        }
-    lastFloor = floor
-    }
+		if lastFloor == -1 && floor != -1 {
+			queue.SetCurrentFloor(floor)
+			signalChannel <- globals.FLOORREACHED
+		}
+		lastFloor = floor
+	}
 }

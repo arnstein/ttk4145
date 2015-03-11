@@ -1,7 +1,7 @@
 package queue
 
 import (
-//	"fmt"
+	"fmt"
 )
 
 const (
@@ -19,10 +19,45 @@ const (
 
 var orders [ORDERS_ARRAY_SIZE]int
 var position int
+var lastFloor int
 var currentFloor int
 
-func SetCurrentFloor(floor int){
-    currentFloor = floor
+func PrintQueue() {
+
+	for i := 0; i < ORDERS_ARRAY_SIZE; i++ {
+		fmt.Print(" ")
+		fmt.Print(orders[i])
+	}
+
+	fmt.Println()
+
+	for i := 0; i < ORDERS_ARRAY_SIZE; i++ {
+		if position == i {
+			fmt.Print("-!")
+		} else {
+			fmt.Print("--")
+		}
+	}
+	fmt.Println()
+	fmt.Println()
+
+}
+
+func SetCurrentFloor(floor int) {
+	lastFloor = currentFloor
+	currentFloor = floor
+
+	dir := currentFloor - lastFloor
+
+	if dir == DIR_UP {
+		position = currentFloor - 1
+	}
+	if dir == DIR_DOWN {
+		position = ORDERS_ARRAY_SIZE - floor + 1
+		position = position % ORDERS_ARRAY_SIZE
+
+	}
+
 }
 func floorAndDirToIndex(floor int, dir int) int {
 
