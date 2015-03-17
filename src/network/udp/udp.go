@@ -3,8 +3,8 @@ package udp
 import (
 	"fmt"
 	"net"
-	//	"strconv"
-	//"strings"
+	"strconv"
+	"strings"
 )
 
 func CheckError(err error) {
@@ -14,22 +14,24 @@ func CheckError(err error) {
 	}
 }
 
-/*
-func GetLocalAddr() {
+func GetMachineID() int {
+	var localAddr string
 	interfaces, _ := net.Interfaces()
 	for _, inter := range interfaces {
 		if addrs, err := inter.Addrs(); err == nil {
 			for _, addr := range addrs {
 				if inter.Name == "eth0" && strings.Contains(addr.String(), "129") {
-					fmt.Println(addr)
+					localAddr = addr.String()
 				}
 			}
 		}
 	}
-
+	localAddr = strings.Split(localAddr, "/")[0]
+	localAddr = strings.Split(localAddr, ".")[3]
+	localID, _ := strconv.Atoi(localAddr)
+	return localID
 }
 
-*/
 func udpSend(sendChan <-chan []byte) {
 	broadcastAddress, err := net.ResolveUDPAddr("udp", "129.241.187.255:20008")
 	CheckError(err)
@@ -49,11 +51,11 @@ func udpReceive(receiveChan chan<- []byte) {
 	CheckError(err)
 	var data []byte = make([]byte, 1500)
 	for {
-		length, addr, err := receiveSocket.ReadFromUDP(data[0:])
+		length, _, err := receiveSocket.ReadFromUDP(data[0:])
 		CheckError(err)
-		fmt.Print("Message from  ")
-		fmt.Print(addr.IP)
-		fmt.Print(": ")
+		//fmt.Print("Message from  ")
+		//fmt.Print(addr.IP)
+		//fmt.Print(": ")
 		receiveChan <- data[:length]
 	}
 }

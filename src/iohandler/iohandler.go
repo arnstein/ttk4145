@@ -5,6 +5,7 @@ import (
 	"fmt"
 	//"time"
 	"globals"
+	"network"
 	"queue"
 )
 
@@ -18,7 +19,8 @@ func PollButtons() {
 			newState := driver.GetButtonSignal(driver.BUTTON_COMMAND, i)
 
 			if newState == 1 && buttonStates[driver.BUTTON_COMMAND][i] == 0 {
-				fmt.Println("order local " + string(i))
+				//handle insideorder
+				fmt.Println("LOL")
 			}
 			buttonStates[driver.BUTTON_COMMAND][i] = newState
 		}
@@ -27,7 +29,8 @@ func PollButtons() {
 			newState := driver.GetButtonSignal(driver.BUTTON_CALL_UP, i)
 
 			if newState == 1 && buttonStates[driver.BUTTON_CALL_UP][i] == 0 {
-				fmt.Println("order up    " + string(i))
+				//fmt.Println("order up    " + string(i))
+				network.NewRequest(i, globals.UP)
 			}
 			buttonStates[driver.BUTTON_CALL_UP][i] = newState
 		}
@@ -36,12 +39,12 @@ func PollButtons() {
 			newState := driver.GetButtonSignal(driver.BUTTON_CALL_DOWN, i)
 
 			if newState == 1 && buttonStates[driver.BUTTON_CALL_DOWN][i] == 0 {
-				fmt.Println("order down  " + string(i))
+				network.NewRequest(i, globals.DOWN)
 			}
 			buttonStates[driver.BUTTON_CALL_DOWN][i] = newState
 		}
-
 	}
+
 }
 
 func checkFloor(signalChannel chan<- int) {
@@ -50,7 +53,7 @@ func checkFloor(signalChannel chan<- int) {
 		floor := driver.GetFloorSensorSignal()
 
 		if lastFloor == -1 && floor != -1 {
-            driver.SetFloorIndicator(floor)
+			driver.SetFloorIndicator(floor)
 			queue.SetCurrentFloor(floor)
 			signalChannel <- globals.FLOORREACHED
 		}
@@ -59,7 +62,7 @@ func checkFloor(signalChannel chan<- int) {
 }
 
 func motor(command int) {
-    SetMotorDir(command)
+	driver.SetMotorDir(command)
 }
 
 // queue stuff

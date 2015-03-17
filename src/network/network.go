@@ -3,7 +3,9 @@ package network
 import (
 	"encoding/json"
 	"fmt"
+	"globals"
 	"network/udp"
+	"queue"
 	"time"
 )
 
@@ -19,12 +21,39 @@ const (
 	COST      = 2
 )
 
+var activeOrderRequest [queue.ORDERS_ARRAY_SIZE]int // find out if globals or queue
+
 type Message struct {
-	MessageType int
-	Data        []int
+	MachineAddress int
+	MessageType    int
+	Data           []int
+}
+
+type responseData struct {
+	Ip   int
+	Cost int
+}
+
+var costsOfOrders [queue.ORDERS_ARRAY_SIZE]responseData
+
+func putNewCost(cost int, ip int, index int) {
+	//need syncronisatioin!
+	if costsOfOrders[index].Cost < cost {
+		return
+	}
+	if costsOfOrders[index].Cost == cost &&
+		costsOfOrders[index].Ip < ip {
+		return
+	}
+
+	costsOfOrders[index].Ip = ip
+	costsOfOrders[index].Cost = cost
+
 }
 
 var mess Message
+var MessageDataChan = make(chan []int)
+var messageChan = make(chan Message)
 
 func NetworkInit() {
 	sendChan := make(chan []byte)
@@ -45,15 +74,35 @@ func receiveMessage(receiveChan <-chan []byte) Message {
 
 }
 
-func sendMessage(sendChan chan<- []byte) {
-	mess := Message{MessageType: ORDERSERVED, Data: []int{1, 2, 3}}
-	for {
-		for i := 0; i < 5; i++ {
-			mess.MessageType = i
-			time.Sleep(1 * time.Second)
-			sendChan <- encodeJSON(mess)
-			fmt.Println("Sent message")
+func NewRequest(floor int, direction int) {
+	message := Message{MachineAddress: globals.MYID, MessageType: ORDER, Data: []int{floor, direction}}
+	messageChan <- message
+}
+
+func handleNewRequest(floor int, direction int) {
+	lowest := 154
+	orderIndex := queue.FloorAndDirToIndex(floor, direction)
+	if activeOrderRequest[orderIndex] == 1 {
+		return
+	} else {
+		activeOrderRequest[orderIndex] = 1
+		// send egen cost
+
+		time.Sleep(1000 * time.Millisecond)
+		// sjekk channel
+		if lowest == globals.MYID {
+			queue.AddToQueue(floor, direction, queue.GLOBAL)
 		}
+
+	}
+}
+func sendMessage(sendChan chan<- []byte) {
+	//	mess := Message{MachineAddress: udp.GetMachineID(), MessageType: ORDERSERVED, Data: []int{1, 2, 3}}
+	var message Message
+	for {
+		message = <-messageChan
+		//	time.Sleep(1 * time.Second)
+		sendChan <- encodeJSON(message)
 	}
 }
 
@@ -72,17 +121,27 @@ func decodeJSON(mess []byte) Message {
 }
 
 func parseMessage(message Message) {
+	fmt.Print("New message from MachineID: ")
+	fmt.Print(message.MachineAddress)
+	fmt.Println()
 	switch message.MessageType {
 	case ORDER:
-		fmt.Println("MessageType: Order")
+		fmt.Println("\t MessageType: Order")
+		fmt.Print("\t Floor: ")
+		fmt.Print(message.Data[0])
+		fmt.Print(" Dir: ")
+		fmt.Print(message.Data[1])
+		fmt.Println()
+		// go handleNowReq
 	case HEARTBEAT:
-		fmt.Println("MessageType: Heartbeat")
+		fmt.Println("\t MessageType: Heartbeat")
 	case COSTORDER:
-		fmt.Println("MessageType: Costorder")
+		fmt.Println("\t MessageType: Costorder")
+		// add to channel
 	case TAKEORDER:
-		fmt.Println("MessageType: Take order")
+		fmt.Println("\t MessageType: Take order")
 	case ORDERSERVED:
-		fmt.Println("MessageType: Order served")
+		fmt.Println("\t MessageType: Order served")
 
 	}
 }

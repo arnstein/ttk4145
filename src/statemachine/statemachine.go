@@ -3,7 +3,9 @@ package statemachine
 import (
 	//"fmt"
 	//"iohandler"
+	"globals"
 	"network"
+	"queue"
 )
 
 /*
@@ -25,45 +27,45 @@ var currentState int = INITIALIZE
 
 func initialize(signal int) {
 	switch signal {
-	case INIT:
+	case globals.INIT:
 		network.NetworkInit()
-        driver.ElevInit()
-        go iohandler.PollButtons()
-        // all the other inits
+		driver.ElevInit()
+		go iohandler.PollButtons()
+		// all the other inits
 		currentState = IDLE
 	}
 }
 
 func idle(signal int) {
 	switch signal {
-	case MOVEORDER:
-        direction = queue.getDirection()
-        motor(direction)
+	case globals.MOVEORDER:
+		direction = queue.getDirection()
+		motor(direction)
 		currentState = MOVING
 	}
 }
 
 func doorOpen(signal int) {
 	switch signal {
-	case TIMEROUT:
-        queue.removeFromQueue()
+	case globals.TIMEROUT:
+		queue.removeFromQueue()
 		currentState = IDLE
 	}
 }
 
 func moving(signal int) {
 	switch signal {
-	case FLOORREACHED:
-        if queue.rightFloor() == 1 {
-            motor(STOP)
-            currentState = DOOROPEN
-	    }
-    }
+	case globals.FLOORREACHED:
+		if queue.rightFloor() == 1 {
+			motor(STOP)
+			currentState = DOOROPEN
+		}
+	}
 }
 
 func StateMachine(signalChannel <-chan int) {
-    select {
-    case signal := <-signalChannel:
+	select {
+	case signal := <-signalChannel:
 		switch signal {
 		case globals.INITIALIZE:
 			initialize(signal)
@@ -77,4 +79,3 @@ func StateMachine(signalChannel <-chan int) {
 		}
 	}
 }
-

@@ -1,7 +1,7 @@
 package main
 
 import (
-	//"driver"
+	"driver"
 	"fmt"
 	//"iohandler"
 	"network"
@@ -12,12 +12,15 @@ import (
 	//	"time"
 	//"statemachine"
 	//	"net"
+	"iohandler"
 )
 
 func main() {
+	driver.ElevInit()
 	network.NetworkInit()
-	//	go statemachine.StateMachine()
-	// signalChannel <- globals.INIT
+	go iohandler.PollButtons()
+	//go statemachine.StateMachine()
+	//signalChannel <- globals.INIT
 	arrived := make(chan int)
 	orders := make(chan int)
 	fmt.Println("int done")
