@@ -48,8 +48,12 @@ func receiveMessage(receiveChan <-chan []byte) Message {
 func sendMessage(sendChan chan<- []byte) {
 	mess := Message{MessageType: ORDERSERVED, Data: []int{1, 2, 3}}
 	for {
-		time.Sleep(1 * time.Second)
-		sendChan <- encodeJSON(mess)
+		for i := 0; i < 5; i++ {
+			mess.MessageType = i
+			time.Sleep(1 * time.Second)
+			sendChan <- encodeJSON(mess)
+			fmt.Println("Sent message")
+		}
 	}
 }
 
@@ -68,14 +72,17 @@ func decodeJSON(mess []byte) Message {
 }
 
 func parseMessage(message Message) {
-	fmt.Print("Message type: ")
-    //if messageType == newOrder: queue.initiateCostStuff
-	fmt.Print(message.MessageType)
-	fmt.Print(" Flr: ")
-	fmt.Print(message.Data[FLOOR])
-	fmt.Print(" Dir: ")
-	fmt.Print(message.Data[DIRECTION])
-	fmt.Print(" Cst: ")
-	fmt.Println(message.Data[COST])
+	switch message.MessageType {
+	case ORDER:
+		fmt.Println("MessageType: Order")
+	case HEARTBEAT:
+		fmt.Println("MessageType: Heartbeat")
+	case COSTORDER:
+		fmt.Println("MessageType: Costorder")
+	case TAKEORDER:
+		fmt.Println("MessageType: Take order")
+	case ORDERSERVED:
+		fmt.Println("MessageType: Order served")
 
+	}
 }

@@ -1,9 +1,9 @@
 package globals
 
-const (
+const(
 	NUM_FLOORS = 4
 )
-cont(
+const(
 	INIT         = 0
 	MOVEORDER    = 1
 	TIMEROUT     = 2
@@ -11,7 +11,7 @@ cont(
 	FLOORREACHED = 4
 )
 
-const (
+const(
     STOP = 0
     UP = 1
     DOWN = -1
