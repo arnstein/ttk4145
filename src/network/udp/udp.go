@@ -39,6 +39,8 @@ func udpSend(sendChan <-chan []byte) {
 	CheckError(err)
 	for {
 		data := <-sendChan
+		//fmt.Print("Sending:   ")
+		//fmt.Println(data)
 		_, err := sendSocket.Write(data)
 		CheckError(err)
 	}
@@ -49,13 +51,14 @@ func udpReceive(receiveChan chan<- []byte) {
 	CheckError(err)
 	receiveSocket, err := net.ListenUDP("udp", localAddress)
 	CheckError(err)
-	var data []byte = make([]byte, 1500)
 	for {
+		var data []byte = make([]byte, 1500)
 		length, _, err := receiveSocket.ReadFromUDP(data[0:])
 		CheckError(err)
 		//fmt.Print("Message from  ")
 		//fmt.Print(addr.IP)
 		//fmt.Print(": ")
+		//tmpData := data[:length]
 		receiveChan <- data[:length]
 	}
 }

@@ -7,6 +7,7 @@ import (
 	"globals"
 	"network/udp"
 	"queue"
+	"sync"
 	"time"
 )
 
@@ -23,6 +24,7 @@ const (
 )
 
 var activeOrderRequest [queue.ORDERS_ARRAY_SIZE]int // find out if globals or queue
+var mutex = &sync.Mutex{}
 
 type Message struct {
 	MachineAddress int
@@ -52,7 +54,11 @@ func receiveMessage(receiveChan <-chan []byte) Message {
 	for {
 		receivedData := <-receiveChan
 		//heartbeatTime = time.Now()
+		//fmt.Print("received data: ")
+		//fmt.Println(receivedData)
 		decoded := decodeJSON(receivedData)
+		//fmt.Print("decoded data:  ")
+		//fmt.Println(decoded)
 
 		parseMessage(decoded)
 	}
@@ -111,8 +117,6 @@ func encodeJSON(mess Message) []byte {
 
 func decodeJSON(mess []byte) Message {
 	var me Message
-	fmt.Println(me)
-
 	err := json.Unmarshal(mess, &me)
 	udp.CheckError(err)
 	return me
