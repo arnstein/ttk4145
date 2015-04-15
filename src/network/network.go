@@ -1,6 +1,7 @@
 package network
 
 import (
+	"driver"
 	"encoding/json"
 	"fmt"
 	"globals"
@@ -38,13 +39,11 @@ var costsOfOrders [queue.ORDERS_ARRAY_SIZE]responseData
 
 var mess Message
 var MessageDataChan = make(chan []int)
-var messageChan = make(chan Message)
+var sendChan = make(chan []byte)
 
 func NetworkInit() {
-	sendChan := make(chan []byte)
 	receiveChan := make(chan []byte)
 	udp.UdpInit(sendChan, receiveChan)
-	go sendMessage(sendChan)
 	go receiveMessage(receiveChan)
 }
 
@@ -54,6 +53,7 @@ func receiveMessage(receiveChan <-chan []byte) Message {
 		receivedData := <-receiveChan
 		//heartbeatTime = time.Now()
 		decoded := decodeJSON(receivedData)
+
 		parseMessage(decoded)
 	}
 
@@ -61,7 +61,7 @@ func receiveMessage(receiveChan <-chan []byte) Message {
 
 func NewRequest(floor int, direction int) {
 	message := Message{MachineAddress: globals.MYID, MessageType: ORDER, Data: []int{floor, direction}}
-	messageChan <- message
+	sendChan <- encodeJSON(message)
 }
 
 func putNewCost(cost int, ip int, index int) {
@@ -86,26 +86,21 @@ func handleNewRequest(floor int, direction int) {
 		return
 	}
 	activeOrderRequest[orderIndex] = 1
-	// send egen cost
-	// make new message with globals.MYID, calculatecost, floor and direction
-	message := Message{MachineAddress: globals.MYID, MessageType: COSTORDER, Data: []int{floor, direction}}
-	queue.CalculateCost(floor, direction)
+
+	cost := queue.CalculateCost(floor, direction)
+	message := Message{MachineAddress: globals.MYID, MessageType: COSTORDER, Data: []int{floor, direction, cost}}
+	sendChan <- encodeJSON(message)
 
 	time.Sleep(1000 * time.Millisecond)
 	// sjekk channel
 	if lowest == globals.MYID {
 		queue.AddToQueue(floor, direction, queue.GLOBAL)
-
+	} else {
+		queue.AddToBackupQueue(floor, direction)
 	}
-}
-func sendMessage(sendChan chan<- []byte) {
-	//	mess := Message{MachineAddress: udp.GetMachineID(), MessageType: ORDERSERVED, Data: []int{1, 2, 3}}
-	var message Message
-	for {
-		message = <-messageChan
-		//	time.Sleep(1 * time.Second)
-		sendChan <- encodeJSON(message)
-	}
+	driver.SetOutsideLamp(floor, direction)
+	//set lights
+	activeOrderRequest[orderIndex] = 0
 }
 
 func encodeJSON(mess Message) []byte {
@@ -116,6 +111,7 @@ func encodeJSON(mess Message) []byte {
 
 func decodeJSON(mess []byte) Message {
 	var me Message
+	fmt.Println(me)
 
 	err := json.Unmarshal(mess, &me)
 	udp.CheckError(err)
@@ -134,7 +130,7 @@ func parseMessage(message Message) {
 		fmt.Print(" Dir: ")
 		fmt.Print(message.Data[1])
 		fmt.Println()
-		// go handleNowReq
+		handleNewRequest(message.Data[0], message.Data[1])
 	case HEARTBEAT:
 		fmt.Println("\t MessageType: Heartbeat")
 	case COSTORDER:

@@ -55,3 +55,12 @@ func GetButtonSignal(button int, floor int) int {
 func SetButtonLamp(button int, floor int, value int) {
 	C.elev_set_button_lamp(C.elev_button_type_t(button), C.int(floor), C.int(value))
 }
+
+// think about this
+func SetOutsideLamp(floor int, direction int) {
+	if direction == DIR_UP {
+		SetButtonLamp(BUTTON_CALL_UP, floor, 1)
+	} else {
+		SetButtonLamp(BUTTON_CALL_DOWN, floor, 1)
+	}
+}
