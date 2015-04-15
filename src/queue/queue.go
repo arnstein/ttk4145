@@ -134,7 +134,7 @@ func CheckBackupTimeouts() {
 			if OrderBackup[i] == time.Unix(0, 0) {
 				continue
 			}
-			if time.Since(OrderBackup[i]) > 1*time.Second {
+			if time.Since(OrderBackup[i]) > 1*time.Minute {
 				fmt.Println("now I shoud resend something")
 			}
 		}
