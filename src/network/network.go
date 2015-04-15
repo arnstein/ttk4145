@@ -70,6 +70,11 @@ func NewRequest(floor int, direction int) {
 	sendChan <- encodeJSON(message)
 }
 
+func RequestServed(floor int, direction int) {
+	message := Message{MachineAddress: globals.MYID, MessageType: ORDERSERVED, Data: []int{floor, direction}}
+	sendChan <- encodeJSON(message)
+}
+
 func putNewCost(cost int, ip int, index int) {
 	//need syncronisatioin!
 	if costsOfOrders[index].Cost < cost {
@@ -86,7 +91,7 @@ func putNewCost(cost int, ip int, index int) {
 }
 
 func handleNewRequest(floor int, direction int) {
-	lowest := 154
+	lowest := globals.MYID
 	orderIndex := queue.FloorAndDirToIndex(floor, direction)
 	if activeOrderRequest[orderIndex] == 1 {
 		return
@@ -144,6 +149,11 @@ func parseMessage(message Message) {
 		fmt.Println("\t MessageType: Take order")
 	case ORDERSERVED:
 		fmt.Println("\t MessageType: Order served")
+		fmt.Print("\t Floor: ")
+		fmt.Print(message.Data[0])
+		fmt.Print(" Dir: ")
+		fmt.Print(message.Data[1])
+		fmt.Println()
 
 	}
 }

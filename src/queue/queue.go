@@ -2,6 +2,7 @@ package queue
 
 import (
 	"fmt"
+	"globals"
 	"time"
 )
 
@@ -23,6 +24,7 @@ var orders [ORDERS_ARRAY_SIZE]int
 var OrderBackup [ORDERS_ARRAY_SIZE]time.Time
 
 var position int
+var currentFloor int
 
 func PrintQueue() {
 
@@ -45,6 +47,8 @@ func PrintQueue() {
 }
 
 func SetCurrentFloor(floor int) {
+	currentFloor = floor
+
 	// move to the next request
 	for i := 0; i < ORDERS_ARRAY_SIZE; i++ {
 		position = (position + 1) % ORDERS_ARRAY_SIZE
@@ -88,6 +92,7 @@ func AddToQueue(floor int, dir int, globalOrLocal int) {
 		return
 	}
 	orders[index] = globalOrLocal
+	globals.SignalChannel <- globals.CHECKORDER
 
 	// flush to disk // TODO
 
@@ -119,7 +124,8 @@ func CheckBackupTimeouts() {
 			if OrderBackup[i] == time.Unix(0, 0) {
 				continue
 			}
-			if time.Since(OrderBackup[i]) > 5*time.Minute {
+			if time.Since(OrderBackup[i]) > 1*time.Second {
+				fmt.Println("now I shoud resend something")
 			}
 		}
 	}
@@ -140,7 +146,7 @@ func CalculateCost(floor int, dir int) int {
 	return cost
 }
 
-func GetNextOrder() int {
+func GetNextOrder() (int, int) {
 
 	nextOrder := -1
 
@@ -154,13 +160,31 @@ func GetNextOrder() int {
 	}
 
 	if nextOrder == -1 {
-		return -1
+		return -1, -1
 	}
 
 	// convert index to floor
 	if nextOrder < ORDERS_ARRAY_SIZE/2 {
-		return nextOrder
+		return nextOrder, 1
 
 	}
-	return ORDERS_ARRAY_SIZE - nextOrder
+	return ORDERS_ARRAY_SIZE - nextOrder, -1
+}
+
+func GetDirection() int {
+
+	next, _ := GetNextOrder()
+
+	fmt.Print("we are in floor ")
+	fmt.Print(currentFloor)
+	fmt.Print(" and want to go to ")
+	fmt.Println(next)
+
+	if next-currentFloor > 0 {
+		return 1
+	}
+	if next-currentFloor < 0 {
+		return -1
+	}
+	return 0
 }

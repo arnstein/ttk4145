@@ -3,10 +3,10 @@ package iohandler
 import (
 	"driver"
 	"fmt"
-	//"time"
 	"globals"
 	"network"
 	"queue"
+	"time"
 )
 
 func PollButtons() {
@@ -30,6 +30,7 @@ func PollButtons() {
 
 			if newState == 1 && buttonStates[driver.BUTTON_CALL_UP][i] == 0 {
 				//fmt.Println("order up    " + string(i))
+				fmt.Println("upbutton")
 				network.NewRequest(i, globals.UP)
 			}
 			buttonStates[driver.BUTTON_CALL_UP][i] = newState
@@ -40,14 +41,17 @@ func PollButtons() {
 
 			if newState == 1 && buttonStates[driver.BUTTON_CALL_DOWN][i] == 0 {
 				network.NewRequest(i, globals.DOWN)
+				fmt.Println("downbutton")
 			}
 			buttonStates[driver.BUTTON_CALL_DOWN][i] = newState
 		}
+
+		time.Sleep(10 * time.Millisecond)
 	}
 
 }
 
-func checkFloor(signalChannel chan<- int) {
+func CheckFloor() {
 	lastFloor := -1
 	for {
 		floor := driver.GetFloorSensorSignal()
@@ -55,13 +59,14 @@ func checkFloor(signalChannel chan<- int) {
 		if lastFloor == -1 && floor != -1 {
 			driver.SetFloorIndicator(floor)
 			queue.SetCurrentFloor(floor)
-			signalChannel <- globals.FLOORREACHED
+			globals.SignalChannel <- globals.FLOORREACHED
 		}
 		lastFloor = floor
+		time.Sleep(10 * time.Millisecond)
 	}
 }
 
-func motor(command int) {
+func Motor(command int) {
 	driver.SetMotorDir(command)
 }
 

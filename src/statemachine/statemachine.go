@@ -1,12 +1,14 @@
 package statemachine
 
 import (
-	//"fmt"
+	"fmt"
+
 	"driver"
 	"globals"
 	"iohandler"
 	"network"
 	"queue"
+	"time"
 )
 
 /*
@@ -32,50 +34,83 @@ func initialize(signal int) {
 		network.NetworkInit()
 		driver.ElevInit()
 		go iohandler.PollButtons()
-		// all the other inits
+		go iohandler.CheckFloor()
 		currentState = IDLE
+		fmt.Println("init done")
+		globals.SignalChannel <- globals.CHECKORDER
 	}
 }
 
 func idle(signal int) {
 	switch signal {
+	case globals.CHECKORDER:
+		fmt.Println("got checkorder")
+		if queue.GetNextOrder() != -1 {
+			globals.SignalChannel <- globals.MOVEORDER
+		} else {
+			fmt.Println("ququee  empty")
+		}
+
 	case globals.MOVEORDER:
-		motor(queue.getDirection())
-		currentState = MOVING
+		fmt.Println("got moveorder")
+		if queue.GetDirection() == 0 {
+			fmt.Println("arrived!")
+			currentState = DOOROPEN
+			globals.SignalChannel <- globals.FLOORREACHED
+		} else {
+			fmt.Println("start moving!")
+			iohandler.Motor(queue.GetDirection())
+			currentState = MOVING
+		}
 	}
 }
 
 func doorOpen(signal int) {
 	switch signal {
+	case globals.FLOORREACHED:
+
+		//send message that order is handled
+		driver.SetDoorOpenLight(1)
+
+		time.Sleep(1 * time.Second)
+		floor, dir := queue.GetNextOrder()
+		network.RequestServed(floor, dir)
+		queue.RemoveFromQueue()
+
+		globals.SignalChannel <- globals.TIMEROUT
 	case globals.TIMEROUT:
-		queue.removeFromQueue()
+		driver.SetDoorOpenLight(0)
 		currentState = IDLE
+		globals.SignalChannel <- globals.CHECKORDER
 	}
 }
 
 func moving(signal int) {
 	switch signal {
 	case globals.FLOORREACHED:
-		if queue.rightFloor() == 1 {
-			motor(STOP)
+		fmt.Println("Floor reached")
+		if queue.GetDirection() == 0 {
+			iohandler.Motor(globals.STOP)
 			currentState = DOOROPEN
+			globals.SignalChannel <- globals.FLOORREACHED
 		}
 	}
 }
 
-func StateMachine(signalChannel <-chan int) {
-	select {
-	case signal := <-signalChannel:
-		switch signal {
-		case globals.INITIALIZE:
-			initialize(signal)
-		case globals.IDLE:
-			idle(signal)
-		case globals.DOOROPEN:
-			doorOpen(signal)
-		case globals.MOVING:
-			moving(signal)
+func StateMachine() {
+	for {
 
+		fmt.Println("waiting for signaø")
+		signal := <-globals.SignalChannel
+		switch currentState {
+		case INITIALIZE:
+			initialize(signal)
+		case IDLE:
+			idle(signal)
+		case DOOROPEN:
+			doorOpen(signal)
+		case MOVING:
+			moving(signal)
 		}
 	}
 }

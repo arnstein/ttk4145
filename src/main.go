@@ -1,32 +1,27 @@
 package main
 
 import (
-	"driver"
-	"fmt"
-	"iohandler"
-	"network"
+	//"driver"
+	//"fmt"
+	//"iohandler"
+	//	"network"
 	//"queue"
-	// "globals"
-	//"statemachine"
+	"globals"
+	"statemachine"
+
 	//"network/udp"
 	//	"time"
-	//"statemachine"
 	//	"net"
 	//"iohandler"
 )
 
 func main() {
-	driver.ElevInit()
-	network.NetworkInit()
-	go iohandler.PollButtons()
-	//go statemachine.StateMachine()
-	//signalChannel <- globals.INIT
-	arrived := make(chan int)
 	orders := make(chan int)
-	fmt.Println("int done")
+	go statemachine.StateMachine()
+	globals.SignalChannel <- globals.INIT
 	for {
 		orders <- 1
-		<-arrived
+		//	<-arrived
 	}
 	//fmt.Println(" 0 1 2 3 2 1")
 	//fmt.Println()

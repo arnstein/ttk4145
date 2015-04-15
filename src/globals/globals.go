@@ -4,6 +4,8 @@ import (
 	"network/udp"
 )
 
+var SignalChannel chan int = make(chan int, 5)
+
 var MYID int = udp.GetMachineID()
 
 const (
@@ -15,6 +17,7 @@ const (
 	TIMEROUT     = 2
 	EMPTYQUEUE   = 3
 	FLOORREACHED = 4
+	CHECKORDER   = 5
 )
 
 const (
