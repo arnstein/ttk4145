@@ -20,7 +20,7 @@ func PollButtons() {
 
 			if newState == 1 && buttonStates[driver.BUTTON_COMMAND][i] == 0 {
 				//handle insideorder
-				fmt.Println("LOL")
+				fmt.Println("911 was an insideorder")
 			}
 			buttonStates[driver.BUTTON_COMMAND][i] = newState
 		}

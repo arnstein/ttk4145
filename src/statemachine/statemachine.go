@@ -2,8 +2,9 @@ package statemachine
 
 import (
 	//"fmt"
-	//"iohandler"
+	"driver"
 	"globals"
+	"iohandler"
 	"network"
 	"queue"
 )
@@ -39,8 +40,7 @@ func initialize(signal int) {
 func idle(signal int) {
 	switch signal {
 	case globals.MOVEORDER:
-		direction = queue.getDirection()
-		motor(direction)
+		motor(queue.getDirection())
 		currentState = MOVING
 	}
 }

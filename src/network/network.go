@@ -36,21 +36,6 @@ type responseData struct {
 
 var costsOfOrders [queue.ORDERS_ARRAY_SIZE]responseData
 
-func putNewCost(cost int, ip int, index int) {
-	//need syncronisatioin!
-	if costsOfOrders[index].Cost < cost {
-		return
-	}
-	if costsOfOrders[index].Cost == cost &&
-		costsOfOrders[index].Ip < ip {
-		return
-	}
-
-	costsOfOrders[index].Ip = ip
-	costsOfOrders[index].Cost = cost
-
-}
-
 var mess Message
 var MessageDataChan = make(chan []int)
 var messageChan = make(chan Message)
@@ -79,20 +64,37 @@ func NewRequest(floor int, direction int) {
 	messageChan <- message
 }
 
+func putNewCost(cost int, ip int, index int) {
+	//need syncronisatioin!
+	if costsOfOrders[index].Cost < cost {
+		return
+	}
+	if costsOfOrders[index].Cost == cost &&
+		costsOfOrders[index].Ip < ip {
+		return
+	}
+
+	costsOfOrders[index].Ip = ip
+	costsOfOrders[index].Cost = cost
+
+}
+
 func handleNewRequest(floor int, direction int) {
 	lowest := 154
 	orderIndex := queue.FloorAndDirToIndex(floor, direction)
 	if activeOrderRequest[orderIndex] == 1 {
 		return
-	} else {
-		activeOrderRequest[orderIndex] = 1
-		// send egen cost
+	}
+	activeOrderRequest[orderIndex] = 1
+	// send egen cost
+	// make new message with globals.MYID, calculatecost, floor and direction
+	message := Message{MachineAddress: globals.MYID, MessageType: COSTORDER, Data: []int{floor, direction}}
+	queue.CalculateCost(floor, direction)
 
-		time.Sleep(1000 * time.Millisecond)
-		// sjekk channel
-		if lowest == globals.MYID {
-			queue.AddToQueue(floor, direction, queue.GLOBAL)
-		}
+	time.Sleep(1000 * time.Millisecond)
+	// sjekk channel
+	if lowest == globals.MYID {
+		queue.AddToQueue(floor, direction, queue.GLOBAL)
 
 	}
 }

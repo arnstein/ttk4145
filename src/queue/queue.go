@@ -2,6 +2,7 @@ package queue
 
 import (
 	"fmt"
+	"time"
 )
 
 const (
@@ -18,6 +19,9 @@ const (
 )
 
 var orders [ORDERS_ARRAY_SIZE]int
+
+var OrderBackup [ORDERS_ARRAY_SIZE]time.Time
+
 var position int
 
 func PrintQueue() {
@@ -85,11 +89,40 @@ func AddToQueue(floor int, dir int, globalOrLocal int) {
 	}
 	orders[index] = globalOrLocal
 
+	// flush to disk // TODO
+
 }
 
-func removeFromQueue() {
+func RemoveFromQueue() {
 
 	orders[position] = NONE
+
+}
+
+func AddToBackupQueue(floor int, dir int) {
+	index := FloorAndDirToIndex(floor, dir)
+
+	OrderBackup[index] = time.Now()
+}
+
+func RemoveFromBackupQueue(floor int, dir int) {
+
+	index := FloorAndDirToIndex(floor, dir)
+	OrderBackup[index], _ = time.Parse("Mon Jan 2 15:04:05 -0700 MST 2006", "Mon Jan 2 15:04:05 -0700 MST 2006")
+
+}
+
+func CheckBackupTimeouts() {
+
+	for {
+		for i := 0; i < ORDERS_ARRAY_SIZE; i++ {
+			if OrderBackup[i] == time.Parse("Mon Jan 2 15:04:05 -0700 MST 2006", "Mon Jan 2 15:04:05 -0700 MST 2006") {
+				continue
+			}
+			if time.Since(OrderBackup[i]) > 5*time.Minute {
+			}
+		}
+	}
 
 }
 
