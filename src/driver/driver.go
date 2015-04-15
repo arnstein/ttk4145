@@ -64,3 +64,10 @@ func SetOutsideLamp(floor int, direction int) {
 		SetButtonLamp(BUTTON_CALL_DOWN, floor, 1)
 	}
 }
+func ClearOutsideLamp(floor int, direction int) {
+	if direction == DIR_UP {
+		SetButtonLamp(BUTTON_CALL_UP, floor, 0)
+	} else {
+		SetButtonLamp(BUTTON_CALL_DOWN, floor, 0)
+	}
+}

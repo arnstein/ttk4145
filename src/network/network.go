@@ -154,6 +154,11 @@ func parseMessage(message Message) {
 		fmt.Print(" Dir: ")
 		fmt.Print(message.Data[1])
 		fmt.Println()
+		if message.MachineAddress == globals.MYID {
+			queue.RemoveFromQueue(message.Data[0], message.Data[1])
+		}
+		queue.RemoveFromBackupQueue(message.Data[0], message.Data[1])
+		driver.ClearOutsideLamp(message.Data[0], message.Data[1])
 
 	}
 }

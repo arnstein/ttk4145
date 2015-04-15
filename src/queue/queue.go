@@ -26,6 +26,16 @@ var OrderBackup [ORDERS_ARRAY_SIZE]time.Time
 var position int
 var currentFloor int
 
+func CurrentIndexToFloorAndDirection() (int, int) {
+
+	if position < ORDERS_ARRAY_SIZE/2 {
+		return position, 1
+
+	}
+	return ORDERS_ARRAY_SIZE - position, -1
+
+}
+
 func PrintQueue() {
 
 	for i := 0; i < ORDERS_ARRAY_SIZE; i++ {
@@ -98,9 +108,9 @@ func AddToQueue(floor int, dir int, globalOrLocal int) {
 
 }
 
-func RemoveFromQueue() {
+func RemoveFromQueue(floor int, dir int) {
 
-	orders[position] = NONE
+	orders[FloorAndDirToIndex(floor, dir)] = NONE
 
 }
 
@@ -146,7 +156,7 @@ func CalculateCost(floor int, dir int) int {
 	return cost
 }
 
-func GetNextOrder() (int, int) {
+func GetNextOrder() int {
 
 	nextOrder := -1
 
@@ -160,20 +170,20 @@ func GetNextOrder() (int, int) {
 	}
 
 	if nextOrder == -1 {
-		return -1, -1
+		return -1
 	}
 
 	// convert index to floor
 	if nextOrder < ORDERS_ARRAY_SIZE/2 {
-		return nextOrder, 1
+		return nextOrder
 
 	}
-	return ORDERS_ARRAY_SIZE - nextOrder, -1
+	return ORDERS_ARRAY_SIZE - nextOrder
 }
 
 func GetDirection() int {
 
-	next, _ := GetNextOrder()
+	next := GetNextOrder()
 
 	fmt.Print("we are in floor ")
 	fmt.Print(currentFloor)

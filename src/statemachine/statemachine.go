@@ -45,7 +45,8 @@ func idle(signal int) {
 	switch signal {
 	case globals.CHECKORDER:
 		fmt.Println("got checkorder")
-		if queue.GetNextOrder() != -1 {
+		floor := queue.GetNextOrder()
+		if floor != -1 {
 			globals.SignalChannel <- globals.MOVEORDER
 		} else {
 			fmt.Println("ququee  empty")
@@ -73,9 +74,8 @@ func doorOpen(signal int) {
 		driver.SetDoorOpenLight(1)
 
 		time.Sleep(1 * time.Second)
-		floor, dir := queue.GetNextOrder()
-		network.RequestServed(floor, dir)
-		queue.RemoveFromQueue()
+		floor, direction := queue.CurrentIndexToFloorAndDirection()
+		network.RequestServed(floor, direction)
 
 		globals.SignalChannel <- globals.TIMEROUT
 	case globals.TIMEROUT:
