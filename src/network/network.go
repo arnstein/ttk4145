@@ -39,6 +39,12 @@ type responseData struct {
 
 var costsOfOrders [queue.ORDERS_ARRAY_SIZE]responseData
 
+func initializeCostsOfOrders() {
+    for i := 0; i < ORDERS_ARRAY_SIZE; i++ {
+        costsOfOrders[i].Ip = 260
+        costsOfOrders[i].Cost = 42
+}
+
 var mess Message
 var MessageDataChan = make(chan []int)
 var sendChan = make(chan []byte)
@@ -91,7 +97,6 @@ func putNewCost(cost int, ip int, index int) {
 }
 
 func handleNewRequest(floor int, direction int) {
-	lowest := globals.MYID
 	orderIndex := queue.FloorAndDirToIndex(floor, direction)
 	if activeOrderRequest[orderIndex] == 1 {
 		return
@@ -104,11 +109,13 @@ func handleNewRequest(floor int, direction int) {
 
 	time.Sleep(1000 * time.Millisecond)
 	// sjekk channel
-	if lowest == globals.MYID {
+	if costsOfOrders[orderIndex].Ip == globals.MYID || costsOfOrders[orderIndex].Cost == 42 {
 		queue.AddToQueue(floor, direction, queue.GLOBAL)
 	} else {
 		queue.AddToBackupQueue(floor, direction)
 	}
+    costsOfOrders[orderIndex].Cost = 42
+    costsOfOrders[orderIndex].Ip = 260 // do we need this?
 	driver.SetOutsideLamp(floor, direction)
 	//set lights
 	activeOrderRequest[orderIndex] = 0
@@ -144,9 +151,8 @@ func parseMessage(message Message) {
 		fmt.Println("\t MessageType: Heartbeat")
 	case COSTORDER:
 		fmt.Println("\t MessageType: Costorder")
-		// add to channel
-	case TAKEORDER:
-		fmt.Println("\t MessageType: Take order")
+        index = queue.FloorAndDirToIndex(message.Data[0], message.Data[1])
+        putNewCost(message.Data[2], message.MachineAddress, index)
 	case ORDERSERVED:
 		fmt.Println("\t MessageType: Order served")
 		fmt.Print("\t Floor: ")
@@ -159,6 +165,5 @@ func parseMessage(message Message) {
 		}
 		queue.RemoveFromBackupQueue(message.Data[0], message.Data[1])
 		driver.ClearOutsideLamp(message.Data[0], message.Data[1])
-
 	}
 }

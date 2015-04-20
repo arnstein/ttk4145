@@ -33,6 +33,7 @@ func initialize(signal int) {
 	case globals.INIT:
 		network.NetworkInit()
 		driver.ElevInit()
+        network.initializeCostsOfOrders() // move this to queue
 		go iohandler.PollButtons()
 		go iohandler.CheckFloor()
 		currentState = IDLE
