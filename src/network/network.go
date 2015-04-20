@@ -39,10 +39,11 @@ type responseData struct {
 
 var costsOfOrders [queue.ORDERS_ARRAY_SIZE]responseData
 
-func initializeCostsOfOrders() {
-    for i := 0; i < ORDERS_ARRAY_SIZE; i++ {
-        costsOfOrders[i].Ip = 260
-        costsOfOrders[i].Cost = 42
+func InitializeCostsOfOrders() {
+	for i := 0; i < queue.ORDERS_ARRAY_SIZE; i++ {
+		costsOfOrders[i].Ip = 260
+		costsOfOrders[i].Cost = 42
+	}
 }
 
 var mess Message
@@ -114,8 +115,8 @@ func handleNewRequest(floor int, direction int) {
 	} else {
 		queue.AddToBackupQueue(floor, direction)
 	}
-    costsOfOrders[orderIndex].Cost = 42
-    costsOfOrders[orderIndex].Ip = 260 // do we need this?
+	costsOfOrders[orderIndex].Cost = 42
+	costsOfOrders[orderIndex].Ip = 260 // do we need this?
 	driver.SetOutsideLamp(floor, direction)
 	//set lights
 	activeOrderRequest[orderIndex] = 0
@@ -151,8 +152,8 @@ func parseMessage(message Message) {
 		fmt.Println("\t MessageType: Heartbeat")
 	case COSTORDER:
 		fmt.Println("\t MessageType: Costorder")
-        index = queue.FloorAndDirToIndex(message.Data[0], message.Data[1])
-        putNewCost(message.Data[2], message.MachineAddress, index)
+		index := queue.FloorAndDirToIndex(message.Data[0], message.Data[1])
+		putNewCost(message.Data[2], message.MachineAddress, index)
 	case ORDERSERVED:
 		fmt.Println("\t MessageType: Order served")
 		fmt.Print("\t Floor: ")
