@@ -45,22 +45,22 @@ func initialize(signal int) {
 func idle(signal int) {
 	switch signal {
 	case globals.CHECKORDER:
-		fmt.Println("got checkorder")
+		//fmt.Println("got checkorder")
 		floor := queue.GetNextOrder()
 		if floor != -1 {
 			globals.SignalChannel <- globals.MOVEORDER
 		} else {
-			fmt.Println("ququee  empty")
+			//fmt.Println("ququee  empty")
 		}
 
 	case globals.MOVEORDER:
-		fmt.Println("got moveorder")
+		//fmt.Println("got moveorder")
 		if queue.GetDirection() == 0 {
-			fmt.Println("arrived!")
+			//fmt.Println("arrived!")
 			currentState = DOOROPEN
 			globals.SignalChannel <- globals.FLOORREACHED
 		} else {
-			fmt.Println("start moving!")
+			//fmt.Println("start moving!")
 			iohandler.Motor(queue.GetDirection())
 			currentState = MOVING
 		}
@@ -89,7 +89,7 @@ func doorOpen(signal int) {
 func moving(signal int) {
 	switch signal {
 	case globals.FLOORREACHED:
-		fmt.Println("Floor reached")
+		//fmt.Println("Floor reached")
 		if queue.GetDirection() == 0 {
 			iohandler.Motor(globals.STOP)
 			currentState = DOOROPEN
@@ -101,7 +101,7 @@ func moving(signal int) {
 func StateMachine() {
 	for {
 
-		fmt.Println("waiting for signaø")
+		//fmt.Println("waiting for signaø")
 		signal := <-globals.SignalChannel
 		switch currentState {
 		case INITIALIZE:

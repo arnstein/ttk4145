@@ -103,22 +103,24 @@ func handleNewRequest(floor int, direction int) {
 		return
 	}
 	activeOrderRequest[orderIndex] = 1
-
 	cost := queue.CalculateCost(floor, direction)
 	message := Message{MachineAddress: globals.MYID, MessageType: COSTORDER, Data: []int{floor, direction, cost}}
 	sendChan <- encodeJSON(message)
 
+	//fmt.Println("IT GOES HERE RIGHT!!!!!!!")
 	time.Sleep(1000 * time.Millisecond)
-	// sjekk channel
+	//fmt.Println("after sleep")
 	if costsOfOrders[orderIndex].Ip == globals.MYID || costsOfOrders[orderIndex].Cost == 42 {
+		//fmt.Println("inside this if")
 		queue.AddToQueue(floor, direction, queue.GLOBAL)
 	} else {
+		//fmt.Println("inside this ELIF LOL")
 		queue.AddToBackupQueue(floor, direction)
 	}
+	//fmt.Println("DOESN'T IT GO HERE???")
 	costsOfOrders[orderIndex].Cost = 42
 	costsOfOrders[orderIndex].Ip = 260 // do we need this?
 	driver.SetOutsideLamp(floor, direction)
-	//set lights
 	activeOrderRequest[orderIndex] = 0
 }
 
@@ -136,6 +138,9 @@ func decodeJSON(mess []byte) Message {
 }
 
 func parseMessage(message Message) {
+	//queue.PrintQueue()
+	fmt.Println(costsOfOrders)
+	fmt.Println(activeOrderRequest)
 	fmt.Print("New message from MachineID: ")
 	fmt.Print(message.MachineAddress)
 	fmt.Println()
@@ -154,6 +159,9 @@ func parseMessage(message Message) {
 		fmt.Println("\t MessageType: Costorder")
 		index := queue.FloorAndDirToIndex(message.Data[0], message.Data[1])
 		putNewCost(message.Data[2], message.MachineAddress, index)
+		fmt.Print(message.Data[2])
+		fmt.Print(" was the cost")
+		fmt.Println()
 	case ORDERSERVED:
 		fmt.Println("\t MessageType: Order served")
 		fmt.Print("\t Floor: ")
