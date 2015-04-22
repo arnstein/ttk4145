@@ -3,10 +3,14 @@ package iohandler
 import (
 	"driver"
 	"globals"
-	"network"
 	"queue"
 	"time"
 )
+
+func IoInit() {
+	driver.ElevInit()
+	go SetLights()
+}
 
 func PollButtons() {
 
@@ -27,7 +31,8 @@ func PollButtons() {
 			newState := driver.GetButtonSignal(driver.BUTTON_CALL_UP, i)
 
 			if newState == 1 && buttonStates[driver.BUTTON_CALL_UP][i] == 0 {
-				network.NewRequest(i, globals.UP)
+				globals.NewRequest <- [2]int{i, globals.UP}
+
 			}
 			buttonStates[driver.BUTTON_CALL_UP][i] = newState
 		}
@@ -36,7 +41,7 @@ func PollButtons() {
 			newState := driver.GetButtonSignal(driver.BUTTON_CALL_DOWN, i)
 
 			if newState == 1 && buttonStates[driver.BUTTON_CALL_DOWN][i] == 0 {
-				network.NewRequest(i, globals.DOWN)
+				globals.NewRequest <- [2]int{i, globals.DOWN}
 			}
 			buttonStates[driver.BUTTON_CALL_DOWN][i] = newState
 		}
@@ -65,4 +70,29 @@ func Motor(command int) {
 	driver.SetMotorDir(command)
 }
 
-// queue stuff
+func SetLights() {
+
+	var lightData [3]int
+	for {
+		lightData = <-globals.LightsChannel
+
+		lightType := lightData[0]
+		floor := lightData[1]
+		value := lightData[2]
+
+		switch lightType {
+
+		case driver.DIR_UP:
+			driver.SetButtonLamp(driver.BUTTON_CALL_UP, floor, value)
+
+		case driver.DIR_DOWN:
+			driver.SetButtonLamp(driver.BUTTON_CALL_DOWN, floor, value)
+
+		case driver.BUTTON_COMMAND:
+			driver.SetButtonLamp(driver.BUTTON_COMMAND, floor, value)
+
+		case driver.DOOROPEN:
+			driver.SetDoorOpenLight(value)
+		}
+	}
+}

@@ -1,8 +1,6 @@
 package queue
 
 import (
-	"driver"
-	"fmt"
 	"globals"
 	"io/ioutil"
 	"os"
@@ -12,6 +10,7 @@ import (
 const (
 	FLOORS            = 4
 	ORDERS_ARRAY_SIZE = (2 * FLOORS) - 2
+	USECURRENTINDEX   = -1
 
 	GLOBAL = 1
 	LOCAL  = 2
@@ -20,6 +19,9 @@ const (
 	DIR_DOWN = -1
 	DIR_ANY  = 0
 	DIR_UP   = 1
+
+	NO_NEXT_ORDER      = -1
+	SPECIAL_CASE_ORDER = -2
 )
 
 var orders [ORDERS_ARRAY_SIZE]int
@@ -39,10 +41,8 @@ func UpdateInsideOrder(floor int, status int) {
 
 	insideOrders[floor] = byte(status)
 	ioutil.WriteFile("insideQueue", insideOrders[:], 0666)
-	// should the queue really use driver?
-	driver.SetButtonLamp(driver.BUTTON_COMMAND, floor, status)
 	globals.SignalChannel <- globals.CHECKORDER
-
+	globals.LightsChannel <- [3]int{globals.BUTTON_COMMAND, floor, status}
 }
 
 func Init() {
@@ -51,7 +51,6 @@ func Init() {
 		_, err := os.Create("insideQueue")
 		globals.CheckError(err)
 	}
-	globals.CheckError(err)
 	if len(array) != FLOORS {
 		for i := 0; i < FLOORS; i++ {
 			UpdateInsideOrder(i, 0)
@@ -64,9 +63,29 @@ func Init() {
 	}
 }
 
+func FloorAndDirToIndex(floor int, dir int) int {
+
+	indexUp := floor
+	indexDown := ORDERS_ARRAY_SIZE - floor
+
+	if dir == DIR_UP {
+		return indexUp
+	}
+
+	if dir == DIR_DOWN {
+		return indexDown
+	}
+
+	if indexUp < position && position < indexDown {
+		return indexDown
+	}
+
+	return indexUp
+}
+
 func IndexToFloorAndDirection(index int) (int, int) {
 
-	if index == -1 {
+	if index == USECURRENTINDEX {
 		index = position
 	}
 
@@ -78,30 +97,10 @@ func IndexToFloorAndDirection(index int) (int, int) {
 
 }
 
-func PrintQueue() {
-
-	for i := 0; i < ORDERS_ARRAY_SIZE; i++ {
-		fmt.Print(" ")
-		fmt.Print(orders[i])
-	}
-
-	fmt.Println()
-
-	for i := 0; i < ORDERS_ARRAY_SIZE; i++ {
-		if position == i {
-			fmt.Print("-!")
-		} else {
-			fmt.Print("--")
-		}
-	}
-	fmt.Println()
-
-}
-
 func SetCurrentFloor(floor int) {
 	currentFloor = floor
 
-	// move to the next request
+	// move pointer forward to the next request
 	for i := 0; i < ORDERS_ARRAY_SIZE; i++ {
 		position = (position + 1) % ORDERS_ARRAY_SIZE
 		nextFloor, _ := IndexToFloorAndDirection(position)
@@ -109,40 +108,16 @@ func SetCurrentFloor(floor int) {
 			break
 		}
 	}
-	// move back to appearance of the floor
+
+	// move pointer back to appearance of the floor
 	for i := 0; i < ORDERS_ARRAY_SIZE; i++ {
 		nextFloor, _ := IndexToFloorAndDirection(position)
 		if nextFloor == floor {
 			return
 		}
-		// avoid negative modulo
-		//if position == floor || position == ORDERS_ARRAY_SIZE-floor {
-		//return
-		//}
 		position = (position - 1 + ORDERS_ARRAY_SIZE) % ORDERS_ARRAY_SIZE
 	}
 }
-
-func FloorAndDirToIndex(floor int, dir int) int {
-
-	wayUp := floor
-	wayDown := ORDERS_ARRAY_SIZE - floor
-
-	if dir == DIR_UP {
-		return wayUp
-	}
-
-	if dir == DIR_DOWN {
-		return wayDown
-	}
-
-	if wayUp < position && position < wayDown {
-		return wayDown
-	}
-
-	return wayUp
-}
-
 func AddToQueue(floor int, dir int, globalOrLocal int) {
 	index := FloorAndDirToIndex(floor, dir)
 
@@ -197,7 +172,6 @@ func GetNextOrder() int {
 
 	nextOrder := -1
 
-	//get index of next order
 	for i := 0; i < ORDERS_ARRAY_SIZE; i++ {
 
 		index := (i + position) % ORDERS_ARRAY_SIZE
@@ -210,14 +184,14 @@ func GetNextOrder() int {
 	}
 
 	if nextOrder == -1 {
-		return -1
+		return NO_NEXT_ORDER
 	}
 
 	nextFloor, _ := IndexToFloorAndDirection(nextOrder)
 
 	// detect special case: up and down order for current floor
 	if currentFloor == nextFloor && nextOrder != position {
-		return -2
+		return SPECIAL_CASE_ORDER
 	}
 
 	return nextFloor
@@ -235,16 +209,9 @@ func GetDirection() int {
 	}
 
 	if dir != 0 {
-		floor, _ := IndexToFloorAndDirection(-1)
+		floor, _ := IndexToFloorAndDirection(USECURRENTINDEX)
 		position = FloorAndDirToIndex(floor, dir)
 	}
-
-	fmt.Print("we are in floor ")
-	fmt.Print(currentFloor)
-	fmt.Print(" and index ")
-	fmt.Print(position)
-	fmt.Print(" and want to go to ")
-	fmt.Println(next)
 
 	return dir
 }

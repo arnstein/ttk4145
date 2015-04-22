@@ -10,6 +10,7 @@ const (
 	BUTTON_CALL_UP   = 0
 	BUTTON_CALL_DOWN = 1
 	BUTTON_COMMAND   = 2
+	DOOROPEN         = 3
 
 	DIR_DOWN = -1
 	DIR_STOP = 0
@@ -22,7 +23,6 @@ func ElevInit() int {
 	for GetFloorSensorSignal() != 0 {
 	}
 	SetMotorDir(DIR_STOP)
-	//SetDoorOpenLight(1)
 
 	return err
 
@@ -54,21 +54,4 @@ func GetButtonSignal(button int, floor int) int {
 
 func SetButtonLamp(button int, floor int, value int) {
 	C.elev_set_button_lamp(C.elev_button_type_t(button), C.int(floor), C.int(value))
-}
-
-// think about this
-func SetOutsideLamp(floor int, direction int) {
-	if direction == DIR_UP {
-		SetButtonLamp(BUTTON_CALL_UP, floor, 1)
-	} else {
-		SetButtonLamp(BUTTON_CALL_DOWN, floor, 1)
-	}
-}
-
-func ClearOutsideLamp(floor int, direction int) {
-	if direction == DIR_UP {
-		SetButtonLamp(BUTTON_CALL_UP, floor, 0)
-	} else {
-		SetButtonLamp(BUTTON_CALL_DOWN, floor, 0)
-	}
 }

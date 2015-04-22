@@ -2,23 +2,12 @@ package statemachine
 
 import (
 	"fmt"
-
-	"driver"
-	//"errors"
 	"globals"
 	"iohandler"
 	"network"
 	"queue"
 	"time"
 )
-
-/*
-init
-moveOrder
-timerout
-emptyqueue
-floorReached
-*/
 
 const (
 	INITIALIZE = 0
@@ -32,15 +21,17 @@ var currentState int = INITIALIZE
 func initialize(signal int) {
 	switch signal {
 	case globals.INIT:
+		fmt.Println("Welcome to the Uppy-Downy Machine(tm)!")
+		fmt.Println("Please wait for initialization to be done.")
 		network.NetworkInit()
-		driver.ElevInit()
+		iohandler.IoInit()
 		queue.Init()
-		network.InitializeCostsOfOrders() // move this to queue
+		network.InitializeCostsOfOrders()
 		go iohandler.PollButtons()
 		go iohandler.CheckFloor()
 		go network.CheckBackupTimeouts()
 		currentState = IDLE
-		fmt.Println("init done")
+		fmt.Println("Initialization done. Please enjoy the Uppy-Downy Machine(tm).")
 		globals.SignalChannel <- globals.CHECKORDER
 	}
 }
@@ -48,11 +39,10 @@ func initialize(signal int) {
 func idle(signal int) {
 	switch signal {
 	case globals.CHECKORDER:
-		//fmt.Println("got checkorder")
 		floor := queue.GetNextOrder()
 
-		// serve special case:
-		if floor == -2 {
+		// special case: only up and down in one floor left to be served
+		if floor == queue.SPECIAL_CASE_ORDER {
 			floor, direction := queue.IndexToFloorAndDirection(-1)
 			network.RequestServed(floor, -1*direction)
 			currentState = DOOROPEN
@@ -63,13 +53,12 @@ func idle(signal int) {
 		}
 
 	case globals.MOVEORDER:
-		//fmt.Println("got moveorder")
+
 		if queue.GetDirection() == 0 {
-			//fmt.Println("arrived!")
 			currentState = DOOROPEN
 			globals.SignalChannel <- globals.FLOORREACHED
+
 		} else {
-			//fmt.Println("start moving!")
 			iohandler.Motor(queue.GetDirection())
 			currentState = MOVING
 		}
@@ -79,30 +68,28 @@ func idle(signal int) {
 func doorOpen(signal int) {
 	switch signal {
 	case globals.FLOORREACHED:
+
 		floor, direction := queue.IndexToFloorAndDirection(-1)
 		queue.UpdateInsideOrder(floor, 0)
-		network.RequestServed(floor, direction)
 
-		//send message that order is handled
-		driver.SetDoorOpenLight(1)
+		network.RequestServed(floor, direction)
+		globals.LightsChannel <- [3]int{3, 0, 1}
 
 		time.Sleep(1 * time.Second)
+		globals.LightsChannel <- [3]int{3, 0, 0}
 
-		//globals.SignalChannel <- globals.TIMEROUT
-		//case globals.TIMEROUT:
-		driver.SetDoorOpenLight(0)
 		currentState = IDLE
 		globals.SignalChannel <- globals.CHECKORDER
 	}
 }
 
 func moving(signal int) {
+
 	switch signal {
 	case globals.FLOORREACHED:
-		//fmt.Println("Floor reached")
+
 		if queue.GetDirection() == 0 {
 			iohandler.Motor(globals.STOP)
-			//globals.CheckError(errors.New("LOL"))
 			currentState = DOOROPEN
 			globals.SignalChannel <- globals.FLOORREACHED
 		}
@@ -111,8 +98,6 @@ func moving(signal int) {
 
 func StateMachine() {
 	for {
-
-		//fmt.Println("waiting for signaø")
 		signal := <-globals.SignalChannel
 		switch currentState {
 		case INITIALIZE:

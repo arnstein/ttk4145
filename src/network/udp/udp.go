@@ -7,6 +7,12 @@ import (
 	"strings"
 )
 
+func UdpInit(sendChan <-chan []byte, receiveChan chan<- []byte) {
+	globals.MYID = GetMachineID()
+	go udpSend(sendChan)
+	go udpReceive(receiveChan)
+}
+
 func GetMachineID() int {
 	var localAddr string
 	interfaces, _ := net.Interfaces()
@@ -32,8 +38,6 @@ func udpSend(sendChan <-chan []byte) {
 	globals.CheckError(err)
 	for {
 		data := <-sendChan
-		//fmt.Print("Sending:   ")
-		//fmt.Println(data)
 		_, err := sendSocket.Write(data)
 		globals.CheckError(err)
 	}
@@ -48,16 +52,6 @@ func udpReceive(receiveChan chan<- []byte) {
 		var data []byte = make([]byte, 1500)
 		length, _, err := receiveSocket.ReadFromUDP(data[0:])
 		globals.CheckError(err)
-		//fmt.Print("Message from  ")
-		//fmt.Print(addr.IP)
-		//fmt.Print(": ")
-		//tmpData := data[:length]
 		receiveChan <- data[:length]
 	}
-}
-
-func UdpInit(sendChan <-chan []byte, receiveChan chan<- []byte) {
-	globals.MYID = GetMachineID()
-	go udpSend(sendChan)
-	go udpReceive(receiveChan)
 }
