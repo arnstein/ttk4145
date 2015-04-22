@@ -142,11 +142,18 @@ func CheckBackupTimeouts() {
 
 }
 
+func abs(i int) int {
+	if i < 0 {
+		return -i
+	}
+	return i
+}
+
 func CalculateCost(floor int, dir int) int {
 
 	endIndex := FloorAndDirToIndex(floor, dir)
 
-	cost := 0
+	cost := abs(currentFloor - floor)
 
 	for i := position; i != endIndex; i = (i + 1) % ORDERS_ARRAY_SIZE {
 		if orders[i] != NONE {

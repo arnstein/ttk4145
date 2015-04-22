@@ -109,15 +109,17 @@ func handleNewRequest(floor int, direction int) {
 
 	//fmt.Println("IT GOES HERE RIGHT!!!!!!!")
 	time.Sleep(1000 * time.Millisecond)
-	//fmt.Println("after sleep")
-	if costsOfOrders[orderIndex].Ip == globals.MYID || costsOfOrders[orderIndex].Cost == 42 {
-		//fmt.Println("inside this if")
+	fmt.Println("inside handlenewreq")
+	fmt.Println(costsOfOrders)
+	if costsOfOrders[orderIndex].Ip == globals.MYID {
+		fmt.Println("inside this if")
 		queue.AddToQueue(floor, direction, queue.GLOBAL)
 	} else {
 		//fmt.Println("inside this ELIF LOL")
 		queue.AddToBackupQueue(floor, direction)
 	}
 	//fmt.Println("DOESN'T IT GO HERE???")
+	//time.Sleep(1000 * time.Millisecond)
 	costsOfOrders[orderIndex].Cost = 42
 	costsOfOrders[orderIndex].Ip = 260 // do we need this?
 	driver.SetOutsideLamp(floor, direction)
@@ -141,6 +143,7 @@ func parseMessage(message Message) {
 	//queue.PrintQueue()
 	fmt.Println(costsOfOrders)
 	fmt.Println(activeOrderRequest)
+	queue.PrintQueue()
 	fmt.Print("New message from MachineID: ")
 	fmt.Print(message.MachineAddress)
 	fmt.Println()
@@ -152,13 +155,13 @@ func parseMessage(message Message) {
 		fmt.Print(" Dir: ")
 		fmt.Print(message.Data[1])
 		fmt.Println()
-		handleNewRequest(message.Data[0], message.Data[1])
+		go handleNewRequest(message.Data[0], message.Data[1])
 	case HEARTBEAT:
 		fmt.Println("\t MessageType: Heartbeat")
 	case COSTORDER:
 		fmt.Println("\t MessageType: Costorder")
 		index := queue.FloorAndDirToIndex(message.Data[0], message.Data[1])
-		go putNewCost(message.Data[2], message.MachineAddress, index)
+		putNewCost(message.Data[2], message.MachineAddress, index)
 		fmt.Print(message.Data[2])
 		fmt.Print(" was the cost")
 		fmt.Println()

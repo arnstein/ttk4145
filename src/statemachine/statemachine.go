@@ -70,13 +70,13 @@ func idle(signal int) {
 func doorOpen(signal int) {
 	switch signal {
 	case globals.FLOORREACHED:
+		floor, direction := queue.CurrentIndexToFloorAndDirection()
+		network.RequestServed(floor, direction)
 
 		//send message that order is handled
 		driver.SetDoorOpenLight(1)
 
 		time.Sleep(1 * time.Second)
-		floor, direction := queue.CurrentIndexToFloorAndDirection()
-		network.RequestServed(floor, direction)
 
 		globals.SignalChannel <- globals.TIMEROUT
 	case globals.TIMEROUT:
