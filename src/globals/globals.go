@@ -1,12 +1,12 @@
 package globals
 
 import (
-	"network/udp"
+	"fmt"
 )
 
 var SignalChannel chan int = make(chan int, 5)
 
-var MYID int = udp.GetMachineID()
+var MYID int
 
 const (
 	NUM_FLOORS = 4
@@ -25,3 +25,10 @@ const (
 	UP   = 1
 	DOWN = -1
 )
+
+func CheckError(err error) {
+	if err != nil {
+		fmt.Println("error")
+		fmt.Println(err.Error())
+	}
+}

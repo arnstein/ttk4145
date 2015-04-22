@@ -2,7 +2,6 @@ package iohandler
 
 import (
 	"driver"
-	"fmt"
 	"globals"
 	"network"
 	"queue"
@@ -19,8 +18,7 @@ func PollButtons() {
 			newState := driver.GetButtonSignal(driver.BUTTON_COMMAND, i)
 
 			if newState == 1 && buttonStates[driver.BUTTON_COMMAND][i] == 0 {
-				//handle insideorder
-				fmt.Println("911 was an insideorder")
+				queue.UpdateInsideOrder(i, 1)
 			}
 			buttonStates[driver.BUTTON_COMMAND][i] = newState
 		}
@@ -29,8 +27,6 @@ func PollButtons() {
 			newState := driver.GetButtonSignal(driver.BUTTON_CALL_UP, i)
 
 			if newState == 1 && buttonStates[driver.BUTTON_CALL_UP][i] == 0 {
-				//fmt.Println("order up    " + string(i))
-				fmt.Println("upbutton")
 				network.NewRequest(i, globals.UP)
 			}
 			buttonStates[driver.BUTTON_CALL_UP][i] = newState
@@ -41,7 +37,6 @@ func PollButtons() {
 
 			if newState == 1 && buttonStates[driver.BUTTON_CALL_DOWN][i] == 0 {
 				network.NewRequest(i, globals.DOWN)
-				fmt.Println("downbutton")
 			}
 			buttonStates[driver.BUTTON_CALL_DOWN][i] = newState
 		}

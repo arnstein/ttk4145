@@ -1,18 +1,11 @@
 package udp
 
 import (
-	"fmt"
+	"globals"
 	"net"
 	"strconv"
 	"strings"
 )
-
-func CheckError(err error) {
-	if err != nil {
-		fmt.Println("error")
-		fmt.Println(err.Error())
-	}
-}
 
 func GetMachineID() int {
 	var localAddr string
@@ -34,27 +27,27 @@ func GetMachineID() int {
 
 func udpSend(sendChan <-chan []byte) {
 	broadcastAddress, err := net.ResolveUDPAddr("udp", "129.241.187.255:20008")
-	CheckError(err)
+	globals.CheckError(err)
 	sendSocket, err := net.DialUDP("udp", nil, broadcastAddress)
-	CheckError(err)
+	globals.CheckError(err)
 	for {
 		data := <-sendChan
 		//fmt.Print("Sending:   ")
 		//fmt.Println(data)
 		_, err := sendSocket.Write(data)
-		CheckError(err)
+		globals.CheckError(err)
 	}
 }
 
 func udpReceive(receiveChan chan<- []byte) {
 	localAddress, err := net.ResolveUDPAddr("udp", ":20008")
-	CheckError(err)
+	globals.CheckError(err)
 	receiveSocket, err := net.ListenUDP("udp", localAddress)
-	CheckError(err)
+	globals.CheckError(err)
 	for {
 		var data []byte = make([]byte, 1500)
 		length, _, err := receiveSocket.ReadFromUDP(data[0:])
-		CheckError(err)
+		globals.CheckError(err)
 		//fmt.Print("Message from  ")
 		//fmt.Print(addr.IP)
 		//fmt.Print(": ")
@@ -64,6 +57,7 @@ func udpReceive(receiveChan chan<- []byte) {
 }
 
 func UdpInit(sendChan <-chan []byte, receiveChan chan<- []byte) {
+	globals.MYID = GetMachineID()
 	go udpSend(sendChan)
 	go udpReceive(receiveChan)
 }

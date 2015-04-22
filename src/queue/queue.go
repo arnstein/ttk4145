@@ -1,8 +1,11 @@
 package queue
 
 import (
+	"driver"
 	"fmt"
 	"globals"
+	"io/ioutil"
+	"os"
 	"time"
 )
 
@@ -21,10 +24,38 @@ const (
 
 var orders [ORDERS_ARRAY_SIZE]int
 
+var insideOrders [FLOORS]byte
+
 var OrderBackup [ORDERS_ARRAY_SIZE]time.Time
 
 var position int
 var currentFloor int
+
+func UpdateInsideOrder(floor int, status int) {
+	insideOrders[floor] = byte(status)
+	ioutil.WriteFile("insideQueue", insideOrders[:], 0666)
+	// should the queue really use driver?
+	driver.SetButtonLamp(driver.BUTTON_COMMAND, floor, status)
+	globals.SignalChannel <- globals.CHECKORDER
+
+}
+
+func Init() {
+	array, err := ioutil.ReadFile("insideQueue")
+	if err != nil {
+		_, err := os.Create("insideQueue")
+		globals.CheckError(err)
+	}
+	if len(array) != FLOORS {
+		for i := 0; i < FLOORS; i++ {
+			UpdateInsideOrder(i, 0)
+		}
+	}
+	for i := 0; i < FLOORS; i++ {
+		status := int(array[i])
+		UpdateInsideOrder(i, status)
+	}
+}
 
 func IndexToFloorAndDirection(index int) (int, int) {
 
@@ -107,9 +138,6 @@ func AddToQueue(floor int, dir int, globalOrLocal int) {
 	}
 	orders[index] = globalOrLocal
 	globals.SignalChannel <- globals.CHECKORDER
-
-	// flush to disk // TODO
-
 }
 
 func RemoveFromQueue(floor int, dir int) {
@@ -158,8 +186,11 @@ func GetNextOrder() int {
 
 	//get index of next order
 	for i := 0; i < ORDERS_ARRAY_SIZE; i++ {
+
 		index := (i + position) % ORDERS_ARRAY_SIZE
-		if orders[index] != NONE {
+		floor, _ := IndexToFloorAndDirection(index)
+
+		if orders[index] != NONE || insideOrders[floor] == 1 {
 			nextOrder = index
 			break
 		}
@@ -169,12 +200,14 @@ func GetNextOrder() int {
 		return -1
 	}
 
-	// convert index to floor
-	if nextOrder < ORDERS_ARRAY_SIZE/2 {
-		return nextOrder
+	nextFloor, _ := IndexToFloorAndDirection(nextOrder)
 
+	// detect special case: up and down order for current floor
+	if currentFloor == nextFloor && nextOrder != position {
+		return -2
 	}
-	return ORDERS_ARRAY_SIZE - nextOrder
+
+	return nextFloor
 }
 
 func GetDirection() int {

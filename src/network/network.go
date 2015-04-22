@@ -151,14 +151,14 @@ func handleNewRequest(floor int, direction int) {
 
 func encodeJSON(mess Message) []byte {
 	b, err := json.Marshal(mess)
-	udp.CheckError(err)
+	globals.CheckError(err)
 	return b
 }
 
 func decodeJSON(mess []byte) Message {
 	var me Message
 	err := json.Unmarshal(mess, &me)
-	udp.CheckError(err)
+	globals.CheckError(err)
 	return me
 }
 

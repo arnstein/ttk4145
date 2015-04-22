@@ -33,6 +33,7 @@ func initialize(signal int) {
 	case globals.INIT:
 		network.NetworkInit()
 		driver.ElevInit()
+		queue.Init()
 		network.InitializeCostsOfOrders() // move this to queue
 		go iohandler.PollButtons()
 		go iohandler.CheckFloor()
@@ -48,10 +49,16 @@ func idle(signal int) {
 	case globals.CHECKORDER:
 		//fmt.Println("got checkorder")
 		floor := queue.GetNextOrder()
-		if floor != -1 {
+
+		// serve special case:
+		if floor == -2 {
+			floor, direction := queue.IndexToFloorAndDirection(-1)
+			network.RequestServed(floor, -1*direction)
+			currentState = DOOROPEN
+			globals.SignalChannel <- globals.FLOORREACHED
+
+		} else if floor >= 0 {
 			globals.SignalChannel <- globals.MOVEORDER
-		} else {
-			//fmt.Println("ququee  empty")
 		}
 
 	case globals.MOVEORDER:
@@ -72,6 +79,7 @@ func doorOpen(signal int) {
 	switch signal {
 	case globals.FLOORREACHED:
 		floor, direction := queue.IndexToFloorAndDirection(-1)
+		queue.UpdateInsideOrder(floor, 0)
 		network.RequestServed(floor, direction)
 
 		//send message that order is handled
@@ -79,8 +87,8 @@ func doorOpen(signal int) {
 
 		time.Sleep(1 * time.Second)
 
-		globals.SignalChannel <- globals.TIMEROUT
-	case globals.TIMEROUT:
+		//globals.SignalChannel <- globals.TIMEROUT
+		//case globals.TIMEROUT:
 		driver.SetDoorOpenLight(0)
 		currentState = IDLE
 		globals.SignalChannel <- globals.CHECKORDER
