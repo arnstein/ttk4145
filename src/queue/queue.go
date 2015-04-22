@@ -138,6 +138,7 @@ func CheckBackupTimeouts() {
 				fmt.Println("now I shoud resend something")
 			}
 		}
+		time.Sleep(1 * time.Second)
 	}
 
 }

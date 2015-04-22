@@ -36,6 +36,7 @@ func initialize(signal int) {
 		network.InitializeCostsOfOrders() // move this to queue
 		go iohandler.PollButtons()
 		go iohandler.CheckFloor()
+		go queue.CheckBackupTimeouts()
 		currentState = IDLE
 		fmt.Println("init done")
 		globals.SignalChannel <- globals.CHECKORDER
