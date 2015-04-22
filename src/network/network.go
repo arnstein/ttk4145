@@ -84,7 +84,7 @@ func CheckBackupTimeouts() {
 			if queue.OrderBackup[i] == time.Unix(0, 0) {
 				continue
 			}
-			if time.Since(queue.OrderBackup[i]) > 1*time.Minute {
+			if time.Since(queue.OrderBackup[i]) > 30*time.Second {
 				fmt.Println("now I shoud resend something")
 				floor, direction := queue.IndexToFloorAndDirection(i)
 				NewRequest(floor, direction)

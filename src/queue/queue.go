@@ -32,6 +32,11 @@ var position int
 var currentFloor int
 
 func UpdateInsideOrder(floor int, status int) {
+
+	if byte(status) == insideOrders[floor] {
+		return
+	}
+
 	insideOrders[floor] = byte(status)
 	ioutil.WriteFile("insideQueue", insideOrders[:], 0666)
 	// should the queue really use driver?
@@ -97,19 +102,25 @@ func SetCurrentFloor(floor int) {
 	// move to the next request
 	for i := 0; i < ORDERS_ARRAY_SIZE; i++ {
 		position = (position + 1) % ORDERS_ARRAY_SIZE
-		if orders[position] != 0 {
+		nextFloor, _ := IndexToFloorAndDirection(position)
+		if orders[position] != 0 || insideOrders[nextFloor] == 1 {
 			break
 		}
 	}
 	// move back to appearance of the floor
 	for i := 0; i < ORDERS_ARRAY_SIZE; i++ {
-		// avoid negative modulo
-		if position == floor || position == ORDERS_ARRAY_SIZE-floor {
+		nextFloor, _ := IndexToFloorAndDirection(position)
+		if nextFloor == floor {
 			return
 		}
+		// avoid negative modulo
+		//if position == floor || position == ORDERS_ARRAY_SIZE-floor {
+		//return
+		//}
 		position = (position - 1 + ORDERS_ARRAY_SIZE) % ORDERS_ARRAY_SIZE
 	}
 }
+
 func FloorAndDirToIndex(floor int, dir int) int {
 
 	wayUp := floor
@@ -190,7 +201,7 @@ func GetNextOrder() int {
 		index := (i + position) % ORDERS_ARRAY_SIZE
 		floor, _ := IndexToFloorAndDirection(index)
 
-		if orders[index] != NONE || insideOrders[floor] == 1 {
+		if orders[index] != NONE || insideOrders[floor] == byte(1) {
 			nextOrder = index
 			break
 		}
@@ -213,17 +224,25 @@ func GetNextOrder() int {
 func GetDirection() int {
 
 	next := GetNextOrder()
+	dir := next - currentFloor
+	if dir > 0 {
+		dir = 1
+	}
+	if dir < 0 {
+		dir = -1
+	}
+
+	if dir != 0 {
+		floor, _ := IndexToFloorAndDirection(-1)
+		position = FloorAndDirToIndex(floor, dir)
+	}
 
 	fmt.Print("we are in floor ")
 	fmt.Print(currentFloor)
+	fmt.Print(" and index ")
+	fmt.Print(position)
 	fmt.Print(" and want to go to ")
 	fmt.Println(next)
 
-	if next-currentFloor > 0 {
-		return 1
-	}
-	if next-currentFloor < 0 {
-		return -1
-	}
-	return 0
+	return dir
 }
