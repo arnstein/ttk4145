@@ -158,7 +158,7 @@ func parseMessage(message Message) {
 	case COSTORDER:
 		fmt.Println("\t MessageType: Costorder")
 		index := queue.FloorAndDirToIndex(message.Data[0], message.Data[1])
-		putNewCost(message.Data[2], message.MachineAddress, index)
+		go putNewCost(message.Data[2], message.MachineAddress, index)
 		fmt.Print(message.Data[2])
 		fmt.Print(" was the cost")
 		fmt.Println()
