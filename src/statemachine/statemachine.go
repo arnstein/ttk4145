@@ -36,7 +36,7 @@ func initialize(signal int) {
 		network.InitializeCostsOfOrders() // move this to queue
 		go iohandler.PollButtons()
 		go iohandler.CheckFloor()
-		go queue.CheckBackupTimeouts()
+		go network.CheckBackupTimeouts()
 		currentState = IDLE
 		fmt.Println("init done")
 		globals.SignalChannel <- globals.CHECKORDER
@@ -71,7 +71,7 @@ func idle(signal int) {
 func doorOpen(signal int) {
 	switch signal {
 	case globals.FLOORREACHED:
-		floor, direction := queue.CurrentIndexToFloorAndDirection()
+		floor, direction := queue.IndexToFloorAndDirection(-1)
 		network.RequestServed(floor, direction)
 
 		//send message that order is handled

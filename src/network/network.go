@@ -72,6 +72,27 @@ func receiveMessage(receiveChan <-chan []byte) Message {
 
 }
 
+func CheckBackupTimeouts() {
+	for i := 0; i < queue.ORDERS_ARRAY_SIZE; i++ {
+		queue.OrderBackup[i] = time.Unix(0, 0)
+	}
+
+	for {
+		for i := 0; i < queue.ORDERS_ARRAY_SIZE; i++ {
+			if queue.OrderBackup[i] == time.Unix(0, 0) {
+				continue
+			}
+			if time.Since(queue.OrderBackup[i]) > 1*time.Minute {
+				fmt.Println("now I shoud resend something")
+				floor, direction := queue.IndexToFloorAndDirection(i)
+				NewRequest(floor, direction)
+				queue.OrderBackup[i] = time.Unix(0, 0)
+			}
+		}
+		time.Sleep(1 * time.Second)
+	}
+
+}
 func NewRequest(floor int, direction int) {
 	message := Message{MachineAddress: globals.MYID, MessageType: ORDER, Data: []int{floor, direction}}
 	sendChan <- encodeJSON(message)

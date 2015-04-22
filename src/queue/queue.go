@@ -26,13 +26,17 @@ var OrderBackup [ORDERS_ARRAY_SIZE]time.Time
 var position int
 var currentFloor int
 
-func CurrentIndexToFloorAndDirection() (int, int) {
+func IndexToFloorAndDirection(index int) (int, int) {
 
-	if position < ORDERS_ARRAY_SIZE/2 {
-		return position, 1
+	if index == -1 {
+		index = position
+	}
+
+	if index < ORDERS_ARRAY_SIZE/2 {
+		return index, 1
 
 	}
-	return ORDERS_ARRAY_SIZE - position, -1
+	return ORDERS_ARRAY_SIZE - index, -1
 
 }
 
@@ -124,22 +128,6 @@ func RemoveFromBackupQueue(floor int, dir int) {
 
 	index := FloorAndDirToIndex(floor, dir)
 	OrderBackup[index] = time.Unix(0, 0)
-
-}
-
-func CheckBackupTimeouts() {
-
-	for {
-		for i := 0; i < ORDERS_ARRAY_SIZE; i++ {
-			if OrderBackup[i] == time.Unix(0, 0) {
-				continue
-			}
-			if time.Since(OrderBackup[i]) > 1*time.Minute {
-				fmt.Println("now I shoud resend something")
-			}
-		}
-		time.Sleep(1 * time.Second)
-	}
 
 }
 
