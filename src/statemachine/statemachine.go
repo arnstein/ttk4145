@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"driver"
+	//"errors"
 	"globals"
 	"iohandler"
 	"network"
@@ -101,6 +102,7 @@ func moving(signal int) {
 		//fmt.Println("Floor reached")
 		if queue.GetDirection() == 0 {
 			iohandler.Motor(globals.STOP)
+			//globals.CheckError(errors.New("LOL"))
 			currentState = DOOROPEN
 			globals.SignalChannel <- globals.FLOORREACHED
 		}

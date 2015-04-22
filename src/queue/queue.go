@@ -51,14 +51,16 @@ func Init() {
 		_, err := os.Create("insideQueue")
 		globals.CheckError(err)
 	}
+	globals.CheckError(err)
 	if len(array) != FLOORS {
 		for i := 0; i < FLOORS; i++ {
 			UpdateInsideOrder(i, 0)
 		}
-	}
-	for i := 0; i < FLOORS; i++ {
-		status := int(array[i])
-		UpdateInsideOrder(i, status)
+	} else {
+		for i := 0; i < FLOORS; i++ {
+			status := int(array[i])
+			UpdateInsideOrder(i, status)
+		}
 	}
 }
 

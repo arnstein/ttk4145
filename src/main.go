@@ -6,8 +6,14 @@ import (
 	//"iohandler"
 	//	"network"
 	//"queue"
+	"errors"
+	"fmt"
 	"globals"
+	"os"
+	//"os/exec"
+	"os/signal"
 	"statemachine"
+	//"watchdog"
 
 	//"network/udp"
 	//	"time"
@@ -16,33 +22,27 @@ import (
 )
 
 func main() {
-	orders := make(chan int)
-	go statemachine.StateMachine()
+
+	//if len(os.Args) == 1 {
+
+	//for {
+	//watchdog.HbListener()
+	//exec.Command("xterm", "-hold", "-e", "./src", "sdffsd").Start() // trollolo
+	//}
+	//}
+
+	//go watchdog.UdpSend()
+	//exec.Command("xterm", "-hold", "-e", "./src", "&").Start()
+
+	defer statemachine.StateMachine()
 	globals.SignalChannel <- globals.INIT
-	for {
-		orders <- 1
-		//	<-arrived
-	}
-	//fmt.Println(" 0 1 2 3 2 1")
-	//fmt.Println()
-	//queue.PrintQueue()
-
-	//queue.AddToQueue(1, 1, 1)
-	//queue.PrintQueue()
-
-	//queue.AddToQueue(1, 0, 2)
-	//queue.PrintQueue()
-
-	//queue.AddToQueue(2, -1, 2)
-	//queue.PrintQueue()
-
-	//queue.SetCurrentFloor(0)
-	//queue.PrintQueue()
-
-	//queue.SetCurrentFloor(1)
-	//queue.PrintQueue()
-	//queue.SetCurrentFloor(2)
-	//queue.PrintQueue()
-	//fmt.Println(queue.GetNextOrder())
-	//fmt.Println(queue.CalculateCost(1, -1))
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	go func() {
+		for sig := range c {
+			globals.CheckError(errors.New("YOMOMMA"))
+			fmt.Println("LOLLOL", sig)
+			//os.Exit(1)
+		}
+	}()
 }
