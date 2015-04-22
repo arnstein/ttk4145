@@ -11,6 +11,8 @@ import (
 	"time"
 )
 
+// dummy comment
+
 const (
 	ORDER       = 0
 	HEARTBEAT   = 1
@@ -91,8 +93,8 @@ func CheckBackupTimeouts() {
 		}
 		time.Sleep(1 * time.Second)
 	}
-
 }
+
 func NewRequest(floor int, direction int) {
 	message := Message{MachineAddress: globals.MYID, MessageType: ORDER, Data: []int{floor, direction}}
 	sendChan <- encodeJSON(message)
