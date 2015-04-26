@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"globals"
+    "iohandler"
 	"os"
 	"os/signal"
 	"statemachine"
@@ -15,7 +16,10 @@ func main() {
 	signal.Notify(c, os.Interrupt)
 	go func() {
 		for _ = range c {
-			globals.CheckError(errors.New("CTRL+C pressed"))
+			fmt.Println("CTRL+C pressed"))
+            iohandler.motor(STOP)
+            os.Exit(1)
+
 		}
 	}()
 }
