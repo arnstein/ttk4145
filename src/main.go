@@ -1,9 +1,9 @@
 package main
 
 import (
-	"errors"
+	"fmt"
 	"globals"
-    "iohandler"
+	"iohandler"
 	"os"
 	"os/signal"
 	"statemachine"
@@ -16,9 +16,9 @@ func main() {
 	signal.Notify(c, os.Interrupt)
 	go func() {
 		for _ = range c {
-			fmt.Println("CTRL+C pressed"))
-            iohandler.motor(STOP)
-            os.Exit(1)
+			fmt.Println("CTRL+C pressed")
+			iohandler.Motor(globals.STOP)
+			os.Exit(1)
 
 		}
 	}()

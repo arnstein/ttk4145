@@ -1,43 +1,45 @@
 package udp
 
 import (
+	"fmt"
 	"globals"
 	"net"
 	"strconv"
 	"strings"
-    "time"
+	"time"
 )
 
-var sendSocketEnabled := 0
-var receiveSocketEnabled := 0
+var sendSocketEnabled int = 0
+var receiveSocketEnabled int = 0
 
 func retryInit(sendChan <-chan []byte, receiveChan chan<- []byte) {
-    time.Sleep(1*time.Minute)
-    UdpInit(sendChan, receiveChan)
+	fmt.Println("Network not work. Retrying to connect in 10 seconds")
+	time.Sleep(10 * time.Second)
+	UdpInit(sendChan, receiveChan)
 }
 
 func UdpInit(sendChan <-chan []byte, receiveChan chan<- []byte) {
 	globals.MYID = getMachineID()
-	broadcastAddress, err := net.ResolveUDPAddr("udp", "129.241.187.255:20008")
-    if !sendSocketEnabled {
-        sendSocket, err := net.DialUDP("udp", nil, broadcastAddress)
-        if err == nil {
-            sendSocketEnabled = 1
-        }
-	    go udpSend(sendChan)
-    }
+	broadcastAddress, _ := net.ResolveUDPAddr("udp", "129.241.187.255:20008")
+	if sendSocketEnabled == 0 {
+		sendSocket, err := net.DialUDP("udp", nil, broadcastAddress)
+		if err == nil {
+			sendSocketEnabled = 1
+		}
+		go udpSend(sendChan, sendSocket)
+	}
 
-	localAddress, err := net.ResolveUDPAddr("udp", ":20008")
-    if !reciveSocketEnabled {
-	    receiveSocket, err := net.ListenUDP("udp", localAddress)
-        if err == nil {
-            receiveSocketEnabled = 1
-	        go udpReceive(receiveChan)
-        }
-    }
-    if !(sendSocketEnabled && receiveSocketEnabled){
-        go retryInit(sendChan, receiveChan)
-    }
+	localAddress, _ := net.ResolveUDPAddr("udp", ":20008")
+	if receiveSocketEnabled == 0 {
+		receiveSocket, err := net.ListenUDP("udp", localAddress)
+		if err == nil {
+			receiveSocketEnabled = 1
+			go udpReceive(receiveChan, receiveSocket)
+		}
+	}
+	if sendSocketEnabled+receiveSocketEnabled != 2 {
+		go retryInit(sendChan, receiveChan)
+	}
 }
 
 func getMachineID() int {
@@ -58,21 +60,25 @@ func getMachineID() int {
 	return localID
 }
 
-func udpSend(sendChan <-chan []byte) {
+func udpSend(sendChan <-chan []byte, sendSocket *net.UDPConn) {
+	if sendSocketEnabled == 0 {
+		for sendSocketEnabled == 0 {
+			<-sendChan
+		}
+		return
+	}
 	for {
 		data := <-sendChan
-        if sendSocketEnabled {
-		    _, err := sendSocket.Write(data)
-		    globals.CheckError(err)
-        }
+		_, err := sendSocket.Write(data)
+		globals.CheckError(err)
 	}
 }
 
-func udpReceive(receiveChan chan<- []byte,) {
+func udpReceive(receiveChan chan<- []byte, receiveSocket *net.UDPConn) {
 	for {
-	    var data []byte = make([]byte, 1500)
-	    length, _, err := receiveSocket.ReadFromUDP(data[0:])
-	    globals.CheckError(err)
-	    receiveChan <- data[:length]
+		var data []byte = make([]byte, 1500)
+		length, _, err := receiveSocket.ReadFromUDP(data[0:])
+		globals.CheckError(err)
+		receiveChan <- data[:length]
 	}
 }
